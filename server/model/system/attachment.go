@@ -1,0 +1,30 @@
+package system
+
+import "time"
+
+// AISystemAttachment 映射 ai_system_attachment 附件表。
+// 附件模块记录上传后的文件元信息，真实文件可能存放在本地、OSS、COS 等不同存储中。
+type AISystemAttachment struct {
+	ID           uint       `json:"id" gorm:"column:id;primaryKey"`         // 附件ID。
+	CreatedBy    *int       `json:"createdBy" gorm:"column:created_by"`     // 创建者ID。
+	UpdatedBy    *int       `json:"updatedBy" gorm:"column:updated_by"`     // 更新者ID。
+	CreateTime   *time.Time `json:"createTime" gorm:"column:create_time"`   // 创建时间。
+	UpdateTime   *time.Time `json:"updateTime" gorm:"column:update_time"`   // 更新时间。
+	DeleteTime   *time.Time `json:"-" gorm:"column:delete_time"`            // 删除时间，非空表示已软删除。
+	StorageMode  int16      `json:"storageMode" gorm:"column:storage_mode"` // 存储模式：1 本地，2 OSS，3 七牛，4 COS，5 S3。
+	OriginName   *string    `json:"originName" gorm:"column:origin_name"`   // 原文件名。
+	ObjectName   *string    `json:"objectName" gorm:"column:object_name"`   // 存储后的文件名。
+	Hash         *string    `json:"hash" gorm:"column:hash"`                // 文件哈希。
+	MimeType     *string    `json:"mimeType" gorm:"column:mime_type"`       // MIME 类型。
+	StoragePath  *string    `json:"storagePath" gorm:"column:storage_path"` // 存储路径。
+	Suffix       *string    `json:"suffix" gorm:"column:suffix"`            // 文件后缀。
+	SizeByte     *int64     `json:"sizeByte" gorm:"column:size_byte"`       // 文件字节数。
+	SizeInfo     *string    `json:"sizeInfo" gorm:"column:size_info"`       // 可读文件大小。
+	URL          *string    `json:"url" gorm:"column:url"`                  // 访问地址。
+	Remark       *string    `json:"remark" gorm:"column:remark"`            // 备注。
+	ResourceType string     `json:"resourceType" gorm:"-"`                  // 前端展示用资源分类。
+}
+
+func (AISystemAttachment) TableName() string {
+	return "ai_system_attachment"
+}
