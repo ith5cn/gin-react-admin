@@ -4,6 +4,13 @@
 
 如果你也在做中后台、低代码、AI 工具、CMS、SaaS 管理端，或者想看一个 Go + React 项目怎么从 0 慢慢长成完整系统，欢迎 Star、Fork、提 Issue。这个仓库会持续迭代，我也会把开发过程中的取舍、坑和重构都尽量留在代码里。
 
+## 相关版本
+这个项目是 Go 版本的后台工程实践。同一套业务思路和后台架构，我也维护了一个 NestJS 版本，适合更熟悉 Node.js / TypeScript 技术栈的开发者参考。
+
+Go 版本：gin-react-admin，当前仓库，技术栈为 Gin + GORM + React。
+NestJS 版本：独立仓库，技术栈为 NestJS + TypeScript。仓库地址：[https://github.com/ith5cn/nestjs-react-admin](https://github.com/ith5cn/nestjs-react-admin)
+两个版本不会强行保持代码一模一样，而是尽量保持相同的产品思路、权限模型、菜单体系和工程分层。你可以把它们看成同一个后台系统理念在不同技术栈里的两种实现。
+
 ## 项目定位
 
 `gin-react-admin` 是一个偏实战的全栈后台基础工程：
