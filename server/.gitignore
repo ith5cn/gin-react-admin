@@ -2,13 +2,9 @@
 .env
 *.env
 !.env.example
-server/.env
-web/.env
-web/.env.*
-!web/.env.example
 
 # Runtime / install state
-server/runtime/
+runtime/
 
 # Logs
 logs/
@@ -19,21 +15,13 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Go build / test artifacts
-server/.gocache/
-server/.tmp-*.exe
-server/*.exe
-server/*.test
-server/coverage.out
-server/.route_check.go
+.gocache/
+.tmp-*.exe
+*.exe
+*.test
+coverage.out
+.route_check.go
 
-# Frontend dependencies / build artifacts
-web/node_modules/
-web/dist/
-web/dist-ssr/
-web/.vite/
-web/.turbo/
-web/.cache/
-web/_tmp_*
 
 # Editor / OS files
 .vscode/*
