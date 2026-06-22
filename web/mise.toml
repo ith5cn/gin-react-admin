@@ -1,0 +1,15 @@
+[tools]
+node = "22"
+pnpm = "10"
+
+[env]
+VITE_APP_CRYPTO_AES_KEY = "O7JyPGeYmOvnxeqoPJMmNftHVrK25l5d"
+VITE_APP_CRYPTO_AES_IV = "R4Qttwb48Q7OkghL"
+VITE_APP_CRYPTO_SIGN_SECRET = "pDNbp7dk6YkW6doma6KKgeeJNg68Dr11"
+VITE_STATIC_COS_PATH = "https://nest-1253835756.cos.ap-guangzhou.myqcloud.com/"
+VITE_APP_BASE_API = "/api"
+
+[tasks]
+install = "pnpm install"
+dev = "pnpm dev"
+build = "pnpm build"
