@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"server/model/common/code"
 	"server/model/common/response"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -54,6 +55,27 @@ func successOrFail(c *gin.Context, data interface{}, err error) {
 	response.Success(c, data)
 }
 
+func systemServiceIDs(value interface{}) []uint {
+	items, ok := value.([]interface{})
+	if !ok {
+		return []uint{}
+	}
+	result := make([]uint, 0, len(items))
+	for _, item := range items {
+		switch v := item.(type) {
+		case float64:
+			result = append(result, uint(v))
+		case string:
+			if id, err := strconv.ParseUint(v, 10, 64); err == nil {
+				result = append(result, uint(id))
+			}
+		}
+	}
+	return result
+}
+
+// QueryMap 及以下导出包装是 codegen 生成代码（api/generated/）的稳定契约，
+// 见 service/system/codegen_templates.go；改名或改签名需同步更新模板。
 func QueryMap(c *gin.Context) map[string]string {
 	return queryMap(c)
 }
