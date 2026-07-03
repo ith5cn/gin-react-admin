@@ -1,11 +1,15 @@
 package system
 
 import (
+	"errors"
 	"net/http"
 	"server/model/common/code"
 	"server/model/common/response"
+	systemService "server/service/system"
+	loggerInit "server/setup/logger"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 func queryMap(c *gin.Context) map[string]string {
@@ -37,12 +41,26 @@ func bindJSON[T any](c *gin.Context) (T, bool) {
 	return payload, true
 }
 
+// successOrFail 统一收敛 service 层错误：
+// BizError 是给用户看的业务错误，透传消息（HTTP 200 + OperationFailed）；
+// 其余一律视为内部错误，记日志后只返回泛化 SystemError，不向客户端泄露 SQL 等细节。
 func successOrFail(c *gin.Context, data interface{}, err error) {
-	if err != nil {
-		response.FailWithHTTP(c, http.StatusInternalServerError, code.SystemError, err.Error())
+	if err == nil {
+		response.Success(c, data)
 		return
 	}
-	response.Success(c, data)
+
+	var bizErr *systemService.BizError
+	if errors.As(err, &bizErr) {
+		response.Fail(c, code.OperationFailed, bizErr.Error())
+		return
+	}
+
+	loggerInit.Logger.Get().Error("request failed",
+		zap.String("method", c.Request.Method),
+		zap.String("path", c.Request.URL.Path),
+		zap.Error(err))
+	response.FailWithHTTP(c, http.StatusInternalServerError, code.SystemError)
 }
 
 // QueryMap 及以下导出包装是 codegen 生成代码（api/generated/）的稳定契约，

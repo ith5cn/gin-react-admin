@@ -3,7 +3,7 @@ import { Col, Form, Input, Modal, Row, message } from "antd";
 import { configGroupCreateApi, configGroupUpdateApi } from "@/api/system/config";
 
 export interface ConfigGroupEditRef {
-  open: (type?: "add" | "edit", data?: Record<string, any>) => void;
+  open: (type?: "add" | "edit", data?: Record<string, unknown>) => void;
 }
 
 interface ConfigGroupEditProps {
@@ -24,7 +24,7 @@ const ConfigGroupEdit = forwardRef<ConfigGroupEditRef, ConfigGroupEditProps>(({ 
   const [form] = Form.useForm();
   const title = `配置分组${mode === "edit" ? " - 编辑" : " - 新增"}`;
 
-  const open = (type: "add" | "edit" = "add", data?: Record<string, any>) => {
+  const open = (type: "add" | "edit" = "add", data?: Record<string, unknown>) => {
     setMode(type);
     form.resetFields();
     form.setFieldsValue(type === "edit" && data ? { ...data } : { ...initialFormData });
@@ -45,8 +45,8 @@ const ConfigGroupEdit = forwardRef<ConfigGroupEditRef, ConfigGroupEditProps>(({ 
       message.success("操作成功");
       onSuccess?.();
       close();
-    } catch (error: any) {
-      if (error?.errorFields) return;
+    } catch (error) {
+      if ((error as { errorFields?: unknown })?.errorFields) return;
     } finally {
       setLoading(false);
     }

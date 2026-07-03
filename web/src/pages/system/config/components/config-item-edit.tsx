@@ -4,7 +4,7 @@ import { configCreateApi, configUpdateApi, getConfigGroupListApi } from "@/api/s
 import { inputComponentOptions } from "./config-constants";
 
 export interface ConfigItemEditRef {
-  open: (type?: "add" | "edit", data?: Record<string, any>) => void;
+  open: (type?: "add" | "edit", data?: Record<string, unknown>) => void;
 }
 
 interface ConfigItemEditProps {
@@ -23,11 +23,11 @@ const initialFormData = {
   remark: "",
 };
 
-const normalizeSelectDataInput = (value: any) => {
+const normalizeSelectDataInput = (value: unknown) => {
   if (Array.isArray(value)) {
     return JSON.stringify(value, null, 2);
   }
-  return value || "";
+  return typeof value === "string" ? value : "";
 };
 
 const ConfigItemEdit = forwardRef<ConfigItemEditRef, ConfigItemEditProps>(({ onSuccess }, ref) => {
@@ -40,11 +40,15 @@ const ConfigItemEdit = forwardRef<ConfigItemEditRef, ConfigItemEditProps>(({ onS
 
   const loadGroups = async () => {
     const res = await getConfigGroupListApi({});
-    const rows = res.data?.list || res.data?.data || res.data || [];
-    setGroupOptions(rows.map((item: any) => ({ label: `${item.name} (${item.code})`, value: item.id })));
+    const rows = (res.data?.list || res.data?.data || res.data || []) as Array<{
+      id: number;
+      name: string;
+      code: string;
+    }>;
+    setGroupOptions(rows.map((item) => ({ label: `${item.name} (${item.code})`, value: item.id })));
   };
 
-  const open = async (type: "add" | "edit" = "add", data?: Record<string, any>) => {
+  const open = async (type: "add" | "edit" = "add", data?: Record<string, unknown>) => {
     setMode(type);
     await loadGroups();
     form.resetFields();
@@ -77,8 +81,8 @@ const ConfigItemEdit = forwardRef<ConfigItemEditRef, ConfigItemEditProps>(({ onS
       message.success("操作成功");
       onSuccess?.();
       close();
-    } catch (error: any) {
-      if (error?.errorFields) return;
+    } catch (error) {
+      if ((error as { errorFields?: unknown })?.errorFields) return;
     } finally {
       setLoading(false);
     }

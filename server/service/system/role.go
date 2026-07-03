@@ -1,7 +1,6 @@
 package system
 
 import (
-	"errors"
 	systemModel "server/model/system"
 	systemRequest "server/model/system/request"
 
@@ -36,7 +35,7 @@ func DeleteRole(id string) error {
 		return err
 	}
 	if has {
-		return errors.New("角色下存在子角色，无法删除")
+		return ErrRoleHasChildren
 	}
 	return deleteByID(&systemModel.AISystemRole{}, id)
 }

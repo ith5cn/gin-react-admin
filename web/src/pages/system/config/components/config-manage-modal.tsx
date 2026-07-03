@@ -50,12 +50,12 @@ const ConfigManageModal = forwardRef<ConfigManageModalRef, ConfigManageModalProp
             edit: {
               show: true,
               auth: ["system/config/update"],
-              func: (record: any) => editRef.current?.open("edit", record),
+              func: (record: { id: number }) => editRef.current?.open("edit", record),
             },
             delete: {
               show: true,
               auth: ["system/config/destroy"],
-              func: async (record: any) => {
+              func: async (record: { id: number }) => {
                 await configDeleteApi(record.id);
                 message.success("删除成功");
                 tableRef.current?.refresh();

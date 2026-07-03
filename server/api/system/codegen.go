@@ -23,9 +23,8 @@ func CodegenDBTables(c *gin.Context) {
 }
 
 func CodegenImportTables(c *gin.Context) {
-	var data systemRequest.CodegenImportPayload
-	if err := c.ShouldBindJSON(&data); err != nil {
-		successOrFail(c, nil, err)
+	data, ok := bindJSON[systemRequest.CodegenImportPayload](c)
+	if !ok {
 		return
 	}
 	result, err := systemService.CodegenImportTables(data)

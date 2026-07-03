@@ -1,7 +1,6 @@
 package system
 
 import (
-	"errors"
 	systemModel "server/model/system"
 	systemRequest "server/model/system/request"
 )
@@ -34,7 +33,7 @@ func DeleteMenu(id string) error {
 		return err
 	}
 	if has {
-		return errors.New("菜单下存在子菜单，无法删除")
+		return ErrMenuHasChildren
 	}
 	return deleteByID(&systemModel.AISystemMenu{}, id)
 }

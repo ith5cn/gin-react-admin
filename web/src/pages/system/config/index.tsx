@@ -34,21 +34,23 @@ import ConfigItemEdit, { type ConfigItemEditRef } from "./components/config-item
 import ConfigManageModal, { type ConfigManageModalRef } from "./components/config-manage-modal";
 import { storageModeGroups } from "./components/config-constants";
 
-interface ConfigGroupRecord {
+type ConfigGroupRecord = {
   id: number;
   name: string;
   code: string;
   remark?: string;
 }
 
-interface ConfigRecord {
+type ConfigValue = string | number | null | undefined;
+
+type ConfigRecord = {
   id: number;
   groupId: number;
   name: string;
   key: string;
-  value: any;
+  value: ConfigValue;
   inputType: string;
-  configSelectData?: any;
+  configSelectData?: unknown;
   sort?: number;
   remark?: string;
   display?: boolean;
@@ -56,8 +58,10 @@ interface ConfigRecord {
 
 const reservedGroupIds = [1, 2, 3];
 
-const parseOptions = (value: any) => {
-  if (Array.isArray(value)) return value;
+type SelectOption = { label: string; value: string | number };
+
+const parseOptions = (value: unknown): SelectOption[] => {
+  if (Array.isArray(value)) return value as SelectOption[];
   if (!value) return [];
   if (typeof value === "string") {
     try {
@@ -70,19 +74,17 @@ const parseOptions = (value: any) => {
   return [];
 };
 
-const extractConfigRows = (payload: any): ConfigRecord[] => {
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.list)) return payload.list;
-  if (Array.isArray(payload?.data)) return payload.data;
+const extractRows = <T,>(payload: unknown): T[] => {
+  if (Array.isArray(payload)) return payload as T[];
+  const box = payload as { list?: unknown; data?: unknown } | null | undefined;
+  if (Array.isArray(box?.list)) return box.list as T[];
+  if (Array.isArray(box?.data)) return box.data as T[];
   return [];
 };
 
-const extractGroupRows = (payload: any): ConfigGroupRecord[] => {
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.list)) return payload.list;
-  if (Array.isArray(payload?.data)) return payload.data;
-  return [];
-};
+const extractConfigRows = (payload: unknown) => extractRows<ConfigRecord>(payload);
+
+const extractGroupRows = (payload: unknown) => extractRows<ConfigGroupRecord>(payload);
 
 const applyUploadModeDisplay = (rows: ConfigRecord[]) => {
   const uploadModeItem = rows.find((item) => item.key === "upload_mode");
@@ -184,7 +186,7 @@ const ConfigIndex = () => {
     [configRows],
   );
 
-  const handleValueChange = (rowId: number, value: any) => {
+  const handleValueChange = (rowId: number, value: ConfigValue) => {
     setConfigRows((prev) => {
       const next = prev.map((item) => (item.id === rowId ? { ...item, value } : item));
       const changed = next.find((item) => item.id === rowId);
@@ -206,7 +208,7 @@ const ConfigIndex = () => {
         key: item.key,
         value: item.value,
         inputType: item.inputType,
-        configSelectData: item.configSelectData,
+        configSelectData: item.configSelectData as string | undefined,
         sort: item.sort,
         remark: item.remark,
       })),
@@ -259,7 +261,7 @@ const ConfigIndex = () => {
       return (
         <Input.TextArea
           rows={4}
-          value={item.value}
+          value={item.value as string | undefined}
           placeholder={`请输入${item.name}`}
           onChange={(e) => handleValueChange(item.id, e.target.value)}
         />
@@ -267,20 +269,30 @@ const ConfigIndex = () => {
     }
 
     if (item.inputType === "uploadImage") {
-      return <ImageUpload value={item.value} onChange={(value) => handleValueChange(item.id, value)} />;
+      return (
+        <ImageUpload
+          value={item.value as string | null | undefined}
+          onChange={(value) => handleValueChange(item.id, value as ConfigValue)}
+        />
+      );
     }
 
     if (item.inputType === "uploadFile") {
-      return <FileUpload value={item.value} onChange={(value) => handleValueChange(item.id, value)} />;
+      return (
+        <FileUpload
+          value={item.value as string | null | undefined}
+          onChange={(value) => handleValueChange(item.id, value as ConfigValue)}
+        />
+      );
     }
 
     if (item.inputType === "wangEditor") {
-      return <WangEditor value={item.value || ""} onChange={(value) => handleValueChange(item.id, value)} />;
+      return <WangEditor value={(item.value as string) || ""} onChange={(value) => handleValueChange(item.id, value)} />;
     }
 
     return (
       <Input
-        value={item.value}
+        value={item.value as string | undefined}
         placeholder={`请输入${item.name}`}
         onChange={(e) => handleValueChange(item.id, e.target.value)}
       />

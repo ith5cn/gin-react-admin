@@ -56,12 +56,12 @@ const RoleIndex = () => {
                     edit: {
                         show: true,
                         auth: ['/system/role/update'],
-                        func: (record: any) => editRef.current?.open('edit', record),
+                        func: (record: { id: number }) => editRef.current?.open('edit', record),
                     },
                     delete: {
                         show: true,
                         auth: ['/system/role/destroy'],
-                        func: async (record: any) => {
+                        func: async (record: { id: number }) => {
                             const res = await roleDeleteApi(record.id);
                             if (res.code === 0) {
                                 message.success("删除成功");

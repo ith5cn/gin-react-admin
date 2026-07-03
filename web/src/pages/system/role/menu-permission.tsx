@@ -1,10 +1,23 @@
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { Descriptions, message, Modal, Tree } from "antd";
+import type { TreeProps } from "antd";
 import { menuAccessApi, menuByRoleApi } from "@/api/system/menu";
 import { roleBindMenuApi } from "@/api/system/role";
 
+type RoleInfo = {
+    id?: number;
+    name?: string;
+    code?: string;
+};
+
+type MenuTreeNode = {
+    id: number;
+    name?: string;
+    children?: MenuTreeNode[];
+};
+
 export interface MenuPermissionRef {
-    open: (record: Record<string, any>) => void;
+    open: (record: RoleInfo) => void;
 }
 
 interface MenuPermissionProps {
@@ -14,15 +27,15 @@ interface MenuPermissionProps {
 const MenuPermission = forwardRef<MenuPermissionRef, MenuPermissionProps>(({ onSuccess }, ref) => {
     const [visible, setVisible] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [roleInfo, setRoleInfo] = useState<Record<string, any>>({});
-    const [menuTree, setMenuTree] = useState<any[]>([]);
+    const [roleInfo, setRoleInfo] = useState<RoleInfo>({});
+    const [menuTree, setMenuTree] = useState<MenuTreeNode[]>([]);
     const [checkedKeys, setCheckedKeys] = useState<number[]>([]);
     const [halfCheckedKeys, setHalfCheckedKeys] = useState<number[]>([]);
 
     // 递归获取所有叶子节点 ID
-    const getLeafKeys = (treeData: any[]) => {
+    const getLeafKeys = (treeData: MenuTreeNode[]) => {
         const leafKeys: number[] = [];
-        const dfs = (nodes: any[]) => {
+        const dfs = (nodes: MenuTreeNode[]) => {
             for (const node of nodes) {
                 if (!node.children || node.children.length === 0) {
                     leafKeys.push(node.id);
@@ -35,7 +48,7 @@ const MenuPermission = forwardRef<MenuPermissionRef, MenuPermissionProps>(({ onS
         return leafKeys;
     };
 
-    const open = async (record: Record<string, any>) => {
+    const open = async (record: RoleInfo) => {
         setRoleInfo(record);
         setVisible(true);
         setLoading(true);
@@ -43,7 +56,7 @@ const MenuPermission = forwardRef<MenuPermissionRef, MenuPermissionProps>(({ onS
             // 并行获取菜单树和角色已有菜单
             const [menuRes, roleMenuRes] = await Promise.all([
                 menuAccessApi(),
-                menuByRoleApi(record.id),
+                menuByRoleApi(record.id as number),
             ]);
 
             const treeData = menuRes.data?.list || menuRes.data?.data || menuRes.data || [];
@@ -78,7 +91,7 @@ const MenuPermission = forwardRef<MenuPermissionRef, MenuPermissionProps>(({ onS
         setHalfCheckedKeys([]);
     };
 
-    const handleCheck = (checked: any, info: any) => {
+    const handleCheck: TreeProps['onCheck'] = (checked, info) => {
         if (Array.isArray(checked)) {
             setCheckedKeys(checked as number[]);
         } else {
@@ -94,7 +107,7 @@ const MenuPermission = forwardRef<MenuPermissionRef, MenuPermissionProps>(({ onS
             // 提交时，将全选节点(checkedKeys)与半选节点(halfCheckedKeys)去重合并一并传给后台
             const finalIds = Array.from(new Set([...checkedKeys, ...halfCheckedKeys]));
             
-            await roleBindMenuApi(roleInfo.id, { ids: finalIds });
+            await roleBindMenuApi(roleInfo.id as number, { ids: finalIds });
             message.success("菜单权限设置成功");
             onSuccess?.();
             close();
@@ -128,7 +141,7 @@ const MenuPermission = forwardRef<MenuPermissionRef, MenuPermissionProps>(({ onS
                     defaultExpandAll
                     checkedKeys={checkedKeys}
                     onCheck={handleCheck}
-                    treeData={menuTree}
+                    treeData={menuTree as unknown as TreeProps['treeData']}
                     fieldNames={{ title: 'name', key: 'id', children: 'children' }}
                 />
             </div>

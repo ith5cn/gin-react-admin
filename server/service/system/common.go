@@ -2,7 +2,6 @@ package system
 
 import (
 	"errors"
-	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -63,29 +62,8 @@ func applyFilters(db *gorm.DB, query map[string]string, likes map[string]string,
 	return db
 }
 
-func queryMap(query map[string][]string) map[string]string {
-	result := make(map[string]string, len(query))
-	for key, values := range query {
-		if len(values) > 0 {
-			result[key] = values[0]
-		}
-	}
-	return result
-}
-
 func softDelete(db *gorm.DB) *gorm.DB {
 	return db.Where("delete_time IS NULL")
-}
-
-func ptrUint(v uint) *uint {
-	return &v
-}
-
-func uintSlice(values []uint) []uint {
-	if values == nil {
-		return []uint{}
-	}
-	return values
 }
 
 func hashPassword(password string) (string, error) {
@@ -153,14 +131,6 @@ func hasChildren(table string, parentID string) (bool, error) {
 	var count int64
 	err = db.Table(table).Where("parent_id = ? AND delete_time IS NULL", parentID).Count(&count).Error
 	return count > 0, err
-}
-
-func hasColumnValue(v interface{}, field string) bool {
-	rv := reflect.ValueOf(v)
-	if rv.Kind() == reflect.Pointer {
-		rv = rv.Elem()
-	}
-	return rv.FieldByName(field).IsValid()
 }
 
 func camelToSnake(value string) string {

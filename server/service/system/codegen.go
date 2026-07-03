@@ -131,7 +131,7 @@ ORDER BY TABLE_NAME ASC`, dbName).Scan(&rows).Error; err != nil {
 func CodegenImportTables(payload systemRequest.CodegenImportPayload) ([]map[string]interface{}, error) {
 	source := sourceOrDefault(payload.Source)
 	if len(payload.Tables) == 0 {
-		return nil, errors.New("请选择要导入的数据表")
+		return nil, ErrNoImportTables
 	}
 	sourceDB, dbName, err := codegenSourceDB(source)
 	if err != nil {
@@ -158,7 +158,7 @@ func CodegenImportTables(payload systemRequest.CodegenImportPayload) ([]map[stri
 
 func CodegenDelete(ids []uint) error {
 	if len(ids) == 0 {
-		return errors.New("请选择要删除的数据表")
+		return ErrNoDeleteTables
 	}
 	db, err := systemDB()
 	if err != nil {
@@ -308,14 +308,14 @@ func refreshGeneratedRouteRegistry() error {
 func importCodegenTable(tx *gorm.DB, sourceDB *gorm.DB, dbName, source string, item systemRequest.CodegenImportTable) (map[string]interface{}, error) {
 	tableName := strings.TrimSpace(item.TableName)
 	if tableName == "" {
-		return nil, errors.New("存在未填写表名的数据表")
+		return nil, ErrEmptyTableName
 	}
 	var tableMeta codegenTableMeta
 	if err := sourceDB.Raw(`SELECT TABLE_NAME, TABLE_COMMENT FROM information_schema.tables WHERE table_schema = ? AND table_name = ? AND table_type = 'BASE TABLE' LIMIT 1`, dbName, tableName).Scan(&tableMeta).Error; err != nil {
 		return nil, err
 	}
 	if tableMeta.TableName == "" {
-		return nil, fmt.Errorf("数据表 %s 不存在", tableName)
+		return nil, NewBizError(fmt.Sprintf("数据表 %s 不存在", tableName))
 	}
 	var columns []codegenColumnMeta
 	if err := sourceDB.Raw(`SELECT COLUMN_NAME, COLUMN_COMMENT, COLUMN_TYPE, COLUMN_DEFAULT, IS_NULLABLE, COLUMN_KEY, ORDINAL_POSITION, DATA_TYPE
@@ -323,7 +323,7 @@ FROM information_schema.columns WHERE table_schema = ? AND table_name = ? ORDER 
 		return nil, err
 	}
 	if len(columns) == 0 {
-		return nil, fmt.Errorf("数据表 %s 未查询到字段信息", tableName)
+		return nil, NewBizError(fmt.Sprintf("数据表 %s 未查询到字段信息", tableName))
 	}
 
 	var existing systemModel.ToolGenerateTable

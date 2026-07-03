@@ -1,7 +1,6 @@
 package system
 
 import (
-	"errors"
 	commonResponse "server/model/common/response"
 	systemModel "server/model/system"
 	"strconv"
@@ -52,7 +51,7 @@ func AttachmentList(query map[string]string) (*commonResponse.PageResult, error)
 // removeSource 目前只预留参数，不主动删除真实文件，避免本地/云存储误删。
 func DeleteAttachments(ids []uint) error {
 	if len(ids) == 0 {
-		return errors.New("附件ID不能为空")
+		return ErrAttachmentIDsEmpty
 	}
 
 	db, err := systemDB()

@@ -3,7 +3,6 @@ package system
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"regexp"
 	commonResponse "server/model/common/response"
@@ -156,7 +155,7 @@ func DatabaseRecycleDestroy(payload systemRequest.DatabaseRecyclePayload) error 
 		return err
 	}
 	if len(payload.IDs) == 0 {
-		return errors.New("请选择要操作的数据")
+		return ErrNoRowsSelected
 	}
 	return db.Exec("DELETE FROM "+quoteIdentifier(tableName)+" WHERE id IN ? AND delete_time IS NOT NULL", payload.IDs).Error
 }
@@ -167,7 +166,7 @@ func maintainTables(tables []string, command string) (map[string]interface{}, er
 		return nil, err
 	}
 	if len(tables) == 0 {
-		return nil, errors.New("请选择要操作的数据表")
+		return nil, ErrNoTablesSelected
 	}
 
 	done := make([]string, 0, len(tables))
@@ -194,7 +193,7 @@ func updateRecycleRows(payload systemRequest.DatabaseRecyclePayload, values map[
 		return err
 	}
 	if len(payload.IDs) == 0 {
-		return errors.New("请选择要操作的数据")
+		return ErrNoRowsSelected
 	}
 	return db.Table(quoteIdentifier(tableName)).Where("id IN ? AND delete_time IS NOT NULL", payload.IDs).Updates(values).Error
 }
@@ -283,17 +282,17 @@ func ensureRecyclableTable(db *gorm.DB, schema string, tableName string) error {
 		return err
 	}
 	if !hasTableColumn(db, schema, tableName, "delete_time") {
-		return errors.New("该数据表没有 delete_time 字段，无法查看回收站")
+		return ErrNoRecycleSupport
 	}
 	if !hasTableColumn(db, schema, tableName, "id") {
-		return errors.New("该数据表没有 id 字段，无法恢复或永久删除")
+		return ErrNoIDColumn
 	}
 	return nil
 }
 
 func ensureTableExists(db *gorm.DB, schema string, tableName string) error {
 	if !safeIdentifierPattern.MatchString(tableName) {
-		return errors.New("非法数据表名称")
+		return ErrInvalidTableName
 	}
 	var count int64
 	err := db.Raw(`SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = ? AND table_type = 'BASE TABLE'`, schema, tableName).Scan(&count).Error
@@ -301,7 +300,7 @@ func ensureTableExists(db *gorm.DB, schema string, tableName string) error {
 		return err
 	}
 	if count == 0 {
-		return errors.New("数据表不存在")
+		return ErrTableNotFound
 	}
 	return nil
 }

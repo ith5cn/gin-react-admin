@@ -1,7 +1,6 @@
 package system
 
 import (
-	"errors"
 	commonResponse "server/model/common/response"
 	systemModel "server/model/system"
 	systemRequest "server/model/system/request"
@@ -46,7 +45,7 @@ func CreateUser(payload systemRequest.UserPayload) (*systemModel.AISystemUser, e
 	}
 
 	if payload.Password == nil || *payload.Password == "" {
-		return nil, errors.New("password is required")
+		return nil, ErrPasswordRequired
 	}
 	hash, err := hashPassword(*payload.Password)
 	if err != nil {
@@ -110,7 +109,7 @@ func DeleteUser(id string) error {
 
 func SetUserPassword(id string, password string) error {
 	if password == "" {
-		return errors.New("password is required")
+		return ErrPasswordRequired
 	}
 	hash, err := hashPassword(password)
 	if err != nil {

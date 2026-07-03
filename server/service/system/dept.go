@@ -1,7 +1,6 @@
 package system
 
 import (
-	"errors"
 	systemModel "server/model/system"
 	systemRequest "server/model/system/request"
 )
@@ -34,7 +33,7 @@ func DeleteDept(id string) error {
 		return err
 	}
 	if has {
-		return errors.New("部门下存在子部门，无法删除")
+		return ErrDeptHasChildren
 	}
 	return deleteByID(&systemModel.AISystemDept{}, id)
 }

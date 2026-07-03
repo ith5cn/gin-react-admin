@@ -3,9 +3,15 @@ import { Form, Input, InputNumber, message, Modal, Radio, Row, Col, TreeSelect, 
 import { roleCreateApi, roleListApi, roleUpdateApi } from "@/api/system/role";
 
 export interface RoleEditRef {
-    open: (type?: 'add' | 'edit', data?: Record<string, any>) => void;
-    setFormData: (data: Record<string, any>) => void;
+    open: (type?: 'add' | 'edit', data?: Record<string, unknown>) => void;
+    setFormData: (data: Record<string, unknown>) => void;
 }
+
+type RoleTreeNode = {
+    id: number;
+    name?: string;
+    children?: RoleTreeNode[];
+};
 
 interface RoleEditProps {
     onSuccess?: () => void;
@@ -46,7 +52,7 @@ const RoleEdit = forwardRef<RoleEditRef, RoleEditProps>(({ onSuccess }, ref) => 
     const [mode, setMode] = useState<'add' | 'edit'>('add');
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
-    const [roleTreeData, setRoleTreeData] = useState<any[]>([]);
+    const [roleTreeData, setRoleTreeData] = useState<RoleTreeNode[]>([]);
 
     const title = '角色管理' + (mode === 'edit' ? ' - 编辑' : ' - 新增');
 
@@ -65,13 +71,13 @@ const RoleEdit = forwardRef<RoleEditRef, RoleEditProps>(({ onSuccess }, ref) => 
     };
 
     // 打开弹框
-    const open = async (type: 'add' | 'edit' = 'add', data?: Record<string, any>) => {
+    const open = async (type: 'add' | 'edit' = 'add', data?: Record<string, unknown>) => {
         setMode(type);
         form.resetFields();
         if (type === 'edit' && data) {
             form.setFieldsValue({
                 ...data,
-                parentId: data.parentId ?? null,
+                parentId: (data.parentId as number | null | undefined) ?? null,
             });
         } else {
             form.setFieldsValue({ ...initialFormData });
@@ -81,7 +87,7 @@ const RoleEdit = forwardRef<RoleEditRef, RoleEditProps>(({ onSuccess }, ref) => 
     };
 
     // 设置表单数据（新增子角色时使用）
-    const setFormData = (data: Record<string, any>) => {
+    const setFormData = (data: Record<string, unknown>) => {
         form.setFieldsValue(data);
     };
 
@@ -103,8 +109,8 @@ const RoleEdit = forwardRef<RoleEditRef, RoleEditProps>(({ onSuccess }, ref) => 
             message.success('操作成功');
             onSuccess?.();
             close();
-        } catch (error: any) {
-            if (error?.errorFields) return;
+        } catch (error) {
+            if ((error as { errorFields?: unknown })?.errorFields) return;
         } finally {
             setLoading(false);
         }
