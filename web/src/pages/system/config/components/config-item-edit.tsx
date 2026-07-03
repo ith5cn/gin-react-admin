@@ -13,12 +13,12 @@ interface ConfigItemEditProps {
 
 const initialFormData = {
   id: undefined,
-  group_id: undefined,
+  groupId: undefined,
   name: "",
   key: "",
   value: "",
-  input_type: "input",
-  config_select_data: "",
+  inputType: "input",
+  configSelectData: "",
   sort: 100,
   remark: "",
 };
@@ -50,7 +50,7 @@ const ConfigItemEdit = forwardRef<ConfigItemEditRef, ConfigItemEditProps>(({ onS
     form.resetFields();
     form.setFieldsValue(
       type === "edit" && data
-        ? { ...data, config_select_data: normalizeSelectDataInput(data.config_select_data) }
+        ? { ...data, configSelectData: normalizeSelectDataInput(data.configSelectData) }
         : { ...initialFormData, ...(data || {}) },
     );
     setVisible(true);
@@ -64,9 +64,9 @@ const ConfigItemEdit = forwardRef<ConfigItemEditRef, ConfigItemEditProps>(({ onS
       const values = await form.validateFields();
       const payload = {
         ...values,
-        config_select_data:
-          ["select", "radio"].includes(values.input_type) && values.config_select_data
-            ? String(values.config_select_data).trim()
+        configSelectData:
+          ["select", "radio"].includes(values.inputType) && values.configSelectData
+            ? String(values.configSelectData).trim()
             : "",
       };
       if (mode === "add") {
@@ -86,7 +86,7 @@ const ConfigItemEdit = forwardRef<ConfigItemEditRef, ConfigItemEditProps>(({ onS
 
   useImperativeHandle(ref, () => ({ open }));
 
-  const currentInputType = Form.useWatch("input_type", form);
+  const currentInputType = Form.useWatch("inputType", form);
 
   return (
     <Modal open={visible} title={title} width={800} confirmLoading={loading} onOk={handleSubmit} onCancel={close}>
@@ -96,7 +96,7 @@ const ConfigItemEdit = forwardRef<ConfigItemEditRef, ConfigItemEditProps>(({ onS
         </Form.Item>
         <Row gutter={16}>
           <Col span={24}>
-            <Form.Item name="group_id" label="配置分组" rules={[{ required: true, message: "请选择配置分组" }]}>
+            <Form.Item name="groupId" label="配置分组" rules={[{ required: true, message: "请选择配置分组" }]}>
               <Select options={groupOptions} placeholder="请选择配置分组" disabled />
             </Form.Item>
           </Col>
@@ -122,7 +122,7 @@ const ConfigItemEdit = forwardRef<ConfigItemEditRef, ConfigItemEditProps>(({ onS
           </Col>
           <Col span={24}>
             <Form.Item
-              name="input_type"
+              name="inputType"
               label="输入组件"
               rules={[{ required: true, message: "请选择输入组件" }]}
             >
@@ -137,7 +137,7 @@ const ConfigItemEdit = forwardRef<ConfigItemEditRef, ConfigItemEditProps>(({ onS
           {["select", "radio"].includes(currentInputType) ? (
             <Col span={24}>
               <Form.Item
-                name="config_select_data"
+                name="configSelectData"
                 label="配置数据"
                 extra='用于配置下拉、单选的数据，格式示例：[{"label":"数据一","value":"value1"}]'
               >

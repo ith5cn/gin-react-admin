@@ -13,22 +13,20 @@ func DeptList(c *gin.Context) {
 }
 
 func CreateDept(c *gin.Context) {
-	var payload systemRequest.DeptPayload
-	data, ok := bindJSONStructAsMap(c, &payload)
+	payload, ok := bindJSON[systemRequest.DeptPayload](c)
 	if !ok {
 		return
 	}
-	result, err := systemService.CreateDept(data)
+	result, err := systemService.CreateDept(payload)
 	successOrFail(c, result, err)
 }
 
 func UpdateDept(c *gin.Context) {
-	var payload systemRequest.DeptPayload
-	data, ok := bindJSONStructAsMap(c, &payload)
+	payload, ok := bindJSON[systemRequest.DeptPayload](c)
 	if !ok {
 		return
 	}
-	result, err := systemService.UpdateDept(c.Param("id"), data)
+	result, err := systemService.UpdateDept(c.Param("id"), payload)
 	successOrFail(c, result, err)
 }
 

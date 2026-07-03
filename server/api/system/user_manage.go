@@ -2,6 +2,7 @@ package system
 
 import (
 	"server/model/common/response"
+	systemRequest "server/model/system/request"
 	systemService "server/service/system"
 
 	"github.com/gin-gonic/gin"
@@ -13,20 +14,20 @@ func UserList(c *gin.Context) {
 }
 
 func CreateUser(c *gin.Context) {
-	data, ok := bindJSONMap(c)
+	payload, ok := bindJSON[systemRequest.UserPayload](c)
 	if !ok {
 		return
 	}
-	result, err := systemService.CreateUser(data)
+	result, err := systemService.CreateUser(payload)
 	successOrFail(c, result, err)
 }
 
 func UpdateUser(c *gin.Context) {
-	data, ok := bindJSONMap(c)
+	payload, ok := bindJSON[systemRequest.UserPayload](c)
 	if !ok {
 		return
 	}
-	result, err := systemService.UpdateUser(c.Param("id"), data)
+	result, err := systemService.UpdateUser(c.Param("id"), payload)
 	successOrFail(c, result, err)
 }
 
@@ -39,19 +40,19 @@ func RefreshUserCache(c *gin.Context) {
 }
 
 func SetUserPassword(c *gin.Context) {
-	data, ok := bindJSONMap(c)
+	payload, ok := bindJSON[systemRequest.SetPasswordPayload](c)
 	if !ok {
 		return
 	}
-	successOrFail(c, true, systemService.SetUserPassword(c.Param("id"), data))
+	successOrFail(c, true, systemService.SetUserPassword(c.Param("id"), payload.Password))
 }
 
 func BindUserRole(c *gin.Context) {
-	data, ok := bindJSONMap(c)
+	payload, ok := bindJSON[systemRequest.IDsPayload](c)
 	if !ok {
 		return
 	}
-	successOrFail(c, true, systemService.BindUserRolesStringID(c.Param("id"), systemServiceIDs(data["ids"])))
+	successOrFail(c, true, systemService.BindUserRolesStringID(c.Param("id"), payload.IDs))
 }
 
 func UserAuthList(c *gin.Context) {

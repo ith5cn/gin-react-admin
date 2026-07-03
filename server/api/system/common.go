@@ -1,11 +1,9 @@
 package system
 
 import (
-	"encoding/json"
 	"net/http"
 	"server/model/common/code"
 	"server/model/common/response"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,22 +27,14 @@ func bindJSONMap(c *gin.Context) (map[string]interface{}, bool) {
 	return data, true
 }
 
-func bindJSONStructAsMap(c *gin.Context, payload interface{}) (map[string]interface{}, bool) {
-	if err := c.ShouldBindJSON(payload); err != nil {
+// bindJSON 绑定类型化请求体，失败时统一返回参数错误响应。
+func bindJSON[T any](c *gin.Context) (T, bool) {
+	var payload T
+	if err := c.ShouldBindJSON(&payload); err != nil {
 		response.Fail(c, code.ParamError, err.Error())
-		return nil, false
+		return payload, false
 	}
-	raw, err := json.Marshal(payload)
-	if err != nil {
-		response.Fail(c, code.ParamError, err.Error())
-		return nil, false
-	}
-	var data map[string]interface{}
-	if err := json.Unmarshal(raw, &data); err != nil {
-		response.Fail(c, code.ParamError, err.Error())
-		return nil, false
-	}
-	return data, true
+	return payload, true
 }
 
 func successOrFail(c *gin.Context, data interface{}, err error) {
@@ -53,25 +43,6 @@ func successOrFail(c *gin.Context, data interface{}, err error) {
 		return
 	}
 	response.Success(c, data)
-}
-
-func systemServiceIDs(value interface{}) []uint {
-	items, ok := value.([]interface{})
-	if !ok {
-		return []uint{}
-	}
-	result := make([]uint, 0, len(items))
-	for _, item := range items {
-		switch v := item.(type) {
-		case float64:
-			result = append(result, uint(v))
-		case string:
-			if id, err := strconv.ParseUint(v, 10, 64); err == nil {
-				result = append(result, uint(id))
-			}
-		}
-	}
-	return result
 }
 
 // QueryMap 及以下导出包装是 codegen 生成代码（api/generated/）的稳定契约，

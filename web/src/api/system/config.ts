@@ -32,7 +32,7 @@ export const configDeleteApi = (id: number | string) => {
   return request.delete(`/system/config/${id}`);
 };
 
-export const configBatchUpdateApi = (data: { group_id: number; config: any[] }) => {
+export const configBatchUpdateApi = (data: { groupId: number; config: any[] }) => {
   return request.post("/system/config/batch-update", data);
 };
 

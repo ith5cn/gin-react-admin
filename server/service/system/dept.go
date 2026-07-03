@@ -3,6 +3,7 @@ package system
 import (
 	"errors"
 	systemModel "server/model/system"
+	systemRequest "server/model/system/request"
 )
 
 func DeptList(query map[string]string) ([]*systemModel.AISystemDept, error) {
@@ -19,14 +20,12 @@ func DeptList(query map[string]string) ([]*systemModel.AISystemDept, error) {
 	return BuildDeptTree(depts), nil
 }
 
-func CreateDept(data map[string]interface{}) (*systemModel.AISystemDept, error) {
-	payload := requestData(data, deptColumns())
-	return createWithLevel[systemModel.AISystemDept]("ai_system_dept", payload)
+func CreateDept(payload systemRequest.DeptPayload) (*systemModel.AISystemDept, error) {
+	return createWithLevel[systemModel.AISystemDept]("ai_system_dept", deptPayloadData(payload))
 }
 
-func UpdateDept(id string, data map[string]interface{}) (*systemModel.AISystemDept, error) {
-	payload := requestData(data, deptColumns())
-	return updateWithLevel[systemModel.AISystemDept]("ai_system_dept", id, payload)
+func UpdateDept(id string, payload systemRequest.DeptPayload) (*systemModel.AISystemDept, error) {
+	return updateWithLevel[systemModel.AISystemDept]("ai_system_dept", id, deptPayloadData(payload))
 }
 
 func DeleteDept(id string) error {
@@ -83,6 +82,13 @@ func BuildDeptTree(depts []systemModel.AISystemDept) []*systemModel.AISystemDept
 	return roots
 }
 
-func deptColumns() map[string]string {
-	return map[string]string{"parentId": "parent_id", "parent_id": "parent_id", "name": "name", "status": "status", "sort": "sort", "remark": "remark"}
+// deptPayloadData 把类型化入参转成 GORM 更新 map，nil 字段跳过（部分更新语义）。
+func deptPayloadData(payload systemRequest.DeptPayload) map[string]interface{} {
+	data := map[string]interface{}{}
+	setColumn(data, "parent_id", payload.ParentID)
+	setColumn(data, "name", payload.Name)
+	setColumn(data, "status", payload.Status)
+	setColumn(data, "sort", payload.Sort)
+	setColumn(data, "remark", payload.Remark)
+	return data
 }

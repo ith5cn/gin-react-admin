@@ -78,7 +78,7 @@ const RoleIndex = () => {
                             icon={<PlusOutlined />}
                             onClick={() => {
                                 editRef.current?.open('add');
-                                editRef.current?.setFormData({ parent_id: record.id });
+                                editRef.current?.setFormData({ parentId: record.id });
                             }}
                         >
                             新增

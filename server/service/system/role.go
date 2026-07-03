@@ -3,6 +3,7 @@ package system
 import (
 	"errors"
 	systemModel "server/model/system"
+	systemRequest "server/model/system/request"
 
 	"gorm.io/gorm"
 )
@@ -21,14 +22,12 @@ func RoleList(query map[string]string) ([]*systemModel.AISystemRole, error) {
 	return BuildRoleTree(roles), nil
 }
 
-func CreateRole(data map[string]interface{}) (*systemModel.AISystemRole, error) {
-	payload := requestData(data, roleColumns())
-	return createWithLevel[systemModel.AISystemRole]("ai_system_role", payload)
+func CreateRole(payload systemRequest.RolePayload) (*systemModel.AISystemRole, error) {
+	return createWithLevel[systemModel.AISystemRole]("ai_system_role", rolePayloadData(payload))
 }
 
-func UpdateRole(id string, data map[string]interface{}) (*systemModel.AISystemRole, error) {
-	payload := requestData(data, roleColumns())
-	return updateWithLevel[systemModel.AISystemRole]("ai_system_role", id, payload)
+func UpdateRole(id string, payload systemRequest.RolePayload) (*systemModel.AISystemRole, error) {
+	return updateWithLevel[systemModel.AISystemRole]("ai_system_role", id, rolePayloadData(payload))
 }
 
 func DeleteRole(id string) error {
@@ -102,6 +101,14 @@ func BuildRoleTree(roles []systemModel.AISystemRole) []*systemModel.AISystemRole
 	return roots
 }
 
-func roleColumns() map[string]string {
-	return map[string]string{"parentId": "parent_id", "parent_id": "parent_id", "name": "name", "code": "code", "dataScope": "data_scope", "data_scope": "data_scope", "status": "status", "sort": "sort", "remark": "remark"}
+func rolePayloadData(payload systemRequest.RolePayload) map[string]interface{} {
+	data := map[string]interface{}{}
+	setColumn(data, "parent_id", payload.ParentID)
+	setColumn(data, "name", payload.Name)
+	setColumn(data, "code", payload.Code)
+	setColumn(data, "data_scope", payload.DataScope)
+	setColumn(data, "status", payload.Status)
+	setColumn(data, "sort", payload.Sort)
+	setColumn(data, "remark", payload.Remark)
+	return data
 }

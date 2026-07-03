@@ -17,10 +17,9 @@ func AttachmentList(c *gin.Context) {
 // DeleteAttachments 批量软删除附件记录。
 // 请求体格式兼容前端：{ ids: [], removeSource?: boolean }。
 func DeleteAttachments(c *gin.Context) {
-	var payload systemRequest.AttachmentDeletePayload
-	data, ok := bindJSONStructAsMap(c, &payload)
+	payload, ok := bindJSON[systemRequest.AttachmentDeletePayload](c)
 	if !ok {
 		return
 	}
-	successOrFail(c, true, systemService.DeleteAttachments(data))
+	successOrFail(c, true, systemService.DeleteAttachments(payload.IDs))
 }

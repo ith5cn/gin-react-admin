@@ -45,7 +45,7 @@ const ConfigManageModal = forwardRef<ConfigManageModalRef, ConfigManageModalProp
             add: {
               show: true,
               auth: ["system/config/create"],
-              func: () => editRef.current?.open("add", { group_id: groupId }),
+              func: () => editRef.current?.open("add", { groupId }),
             },
             edit: {
               show: true,
@@ -63,7 +63,7 @@ const ConfigManageModal = forwardRef<ConfigManageModalRef, ConfigManageModalProp
               },
             },
           }}
-          extraSearchParams={{ group_id: groupId, orderBy: "sort", orderType: "DESC" }}
+          extraSearchParams={{ groupId, orderBy: "sort", orderType: "DESC" }}
           searchFields={
             <>
               <Col span={6}>
@@ -83,7 +83,7 @@ const ConfigManageModal = forwardRef<ConfigManageModalRef, ConfigManageModalProp
             { title: "配置标识", dataIndex: "key", width: 180 },
             { title: "配置值", dataIndex: "value", width: 240 },
             { title: "排序", dataIndex: "sort", width: 100 },
-            { title: "输入组件", dataIndex: "input_type", width: 120 },
+            { title: "输入组件", dataIndex: "inputType", width: 120 },
             { title: "配置说明", dataIndex: "remark", width: 220 },
           ] as ColumnDef[]}
         />

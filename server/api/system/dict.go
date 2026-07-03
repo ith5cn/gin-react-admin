@@ -13,22 +13,20 @@ func DictTypeList(c *gin.Context) {
 }
 
 func CreateDictType(c *gin.Context) {
-	var payload systemRequest.DictTypePayload
-	data, ok := bindJSONStructAsMap(c, &payload)
+	payload, ok := bindJSON[systemRequest.DictTypePayload](c)
 	if !ok {
 		return
 	}
-	result, err := systemService.CreateDictType(data)
+	result, err := systemService.CreateDictType(payload)
 	successOrFail(c, result, err)
 }
 
 func UpdateDictType(c *gin.Context) {
-	var payload systemRequest.DictTypePayload
-	data, ok := bindJSONStructAsMap(c, &payload)
+	payload, ok := bindJSON[systemRequest.DictTypePayload](c)
 	if !ok {
 		return
 	}
-	result, err := systemService.UpdateDictType(c.Param("id"), data)
+	result, err := systemService.UpdateDictType(c.Param("id"), payload)
 	successOrFail(c, result, err)
 }
 
@@ -47,22 +45,20 @@ func DictAll(c *gin.Context) {
 }
 
 func CreateDictData(c *gin.Context) {
-	var payload systemRequest.DictDataPayload
-	data, ok := bindJSONStructAsMap(c, &payload)
+	payload, ok := bindJSON[systemRequest.DictDataPayload](c)
 	if !ok {
 		return
 	}
-	result, err := systemService.CreateDictData(data)
+	result, err := systemService.CreateDictData(payload)
 	successOrFail(c, result, err)
 }
 
 func UpdateDictData(c *gin.Context) {
-	var payload systemRequest.DictDataPayload
-	data, ok := bindJSONStructAsMap(c, &payload)
+	payload, ok := bindJSON[systemRequest.DictDataPayload](c)
 	if !ok {
 		return
 	}
-	result, err := systemService.UpdateDictData(c.Param("id"), data)
+	result, err := systemService.UpdateDictData(c.Param("id"), payload)
 	successOrFail(c, result, err)
 }
 

@@ -50,8 +50,7 @@ func AttachmentList(query map[string]string) (*commonResponse.PageResult, error)
 
 // DeleteAttachments 批量软删除附件记录。
 // removeSource 目前只预留参数，不主动删除真实文件，避免本地/云存储误删。
-func DeleteAttachments(data map[string]interface{}) error {
-	ids := idsFromAny(data["ids"])
+func DeleteAttachments(ids []uint) error {
 	if len(ids) == 0 {
 		return errors.New("附件ID不能为空")
 	}

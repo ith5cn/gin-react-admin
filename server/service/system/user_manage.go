@@ -4,6 +4,7 @@ import (
 	"errors"
 	commonResponse "server/model/common/response"
 	systemModel "server/model/system"
+	systemRequest "server/model/system/request"
 
 	"gorm.io/gorm"
 )
@@ -38,35 +39,33 @@ func UserList(query map[string]string) (*commonResponse.PageResult, error) {
 	return &commonResponse.PageResult{List: users, Total: total}, nil
 }
 
-func CreateUser(data map[string]interface{}) (*systemModel.AISystemUser, error) {
+func CreateUser(payload systemRequest.UserPayload) (*systemModel.AISystemUser, error) {
 	db, err := systemDB()
 	if err != nil {
 		return nil, err
 	}
 
-	roles := idsFromAny(data["roles"])
-	payload := requestData(data, userColumns())
-	if password, ok := data["password"].(string); ok && password != "" {
-		hash, err := hashPassword(password)
-		if err != nil {
-			return nil, err
-		}
-		payload["password"] = hash
-	}
-	setDefaultTimes(payload, true)
-
-	if payload["password"] == nil {
+	if payload.Password == nil || *payload.Password == "" {
 		return nil, errors.New("password is required")
 	}
+	hash, err := hashPassword(*payload.Password)
+	if err != nil {
+		return nil, err
+	}
 
-	if err := db.Model(&systemModel.AISystemUser{}).Create(payload).Error; err != nil {
+	data := userPayloadData(payload)
+	data["password"] = hash
+	setDefaultTimes(data, true)
+
+	if err := db.Model(&systemModel.AISystemUser{}).Create(data).Error; err != nil {
 		return nil, err
 	}
 
 	var user systemModel.AISystemUser
-	if err := db.Where("username = ?", payload["username"]).First(&user).Error; err != nil {
+	if err := db.Where("username = ?", data["username"]).First(&user).Error; err != nil {
 		return nil, err
 	}
+	roles := payload.Roles
 	if len(roles) > 0 {
 		if err := BindUserRoles(user.ID, roles); err != nil {
 			return nil, err
@@ -76,22 +75,23 @@ func CreateUser(data map[string]interface{}) (*systemModel.AISystemUser, error) 
 	return &user, nil
 }
 
-func UpdateUser(id string, data map[string]interface{}) (*systemModel.AISystemUser, error) {
+func UpdateUser(id string, payload systemRequest.UserPayload) (*systemModel.AISystemUser, error) {
 	db, err := systemDB()
 	if err != nil {
 		return nil, err
 	}
 
-	payload := requestData(data, userColumns())
-	delete(payload, "password")
-	setDefaultTimes(payload, false)
-	if len(payload) > 0 {
-		if err := db.Model(&systemModel.AISystemUser{}).Where("id = ?", id).Updates(payload).Error; err != nil {
+	// 更新接口不改密码，密码走独立的 set-password 接口。
+	data := userPayloadData(payload)
+	setDefaultTimes(data, false)
+	if len(data) > 0 {
+		if err := db.Model(&systemModel.AISystemUser{}).Where("id = ?", id).Updates(data).Error; err != nil {
 			return nil, err
 		}
 	}
-	if rolesValue, ok := data["roles"]; ok {
-		if err := BindUserRolesStringID(id, idsFromAny(rolesValue)); err != nil {
+	// Roles 为 nil 表示前端未提交角色字段，保持原绑定不动。
+	if payload.Roles != nil {
+		if err := BindUserRolesStringID(id, payload.Roles); err != nil {
 			return nil, err
 		}
 	}
@@ -108,8 +108,7 @@ func DeleteUser(id string) error {
 	return deleteByID(&systemModel.AISystemUser{}, id)
 }
 
-func SetUserPassword(id string, data map[string]interface{}) error {
-	password, _ := data["password"].(string)
+func SetUserPassword(id string, password string) error {
 	if password == "" {
 		return errors.New("password is required")
 	}
@@ -186,6 +185,19 @@ func RoleIDsByUserID(userID uint) ([]uint, error) {
 	return result, nil
 }
 
-func userColumns() map[string]string {
-	return map[string]string{"username": "username", "user_type": "user_type", "userType": "user_type", "nickname": "nickname", "phone": "phone", "email": "email", "avatar": "avatar", "signed": "signed", "dashboard": "dashboard", "deptId": "dept_id", "status": "status", "remark": "remark", "backendSetting": "backend_setting"}
+func userPayloadData(payload systemRequest.UserPayload) map[string]interface{} {
+	data := map[string]interface{}{}
+	setColumn(data, "username", payload.Username)
+	setColumn(data, "user_type", payload.UserType)
+	setColumn(data, "nickname", payload.Nickname)
+	setColumn(data, "phone", payload.Phone)
+	setColumn(data, "email", payload.Email)
+	setColumn(data, "avatar", payload.Avatar)
+	setColumn(data, "signed", payload.Signed)
+	setColumn(data, "dashboard", payload.Dashboard)
+	setColumn(data, "dept_id", payload.DeptID)
+	setColumn(data, "status", payload.Status)
+	setColumn(data, "remark", payload.Remark)
+	setColumn(data, "backend_setting", payload.BackendSetting)
+	return data
 }

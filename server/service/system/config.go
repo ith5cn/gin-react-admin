@@ -3,6 +3,7 @@ package system
 import (
 	commonResponse "server/model/common/response"
 	systemModel "server/model/system"
+	systemRequest "server/model/system/request"
 
 	"gorm.io/gorm"
 )
@@ -12,12 +13,12 @@ func ConfigGroupList(query map[string]string) (*commonResponse.PageResult, error
 	return pageList(query, &systemModel.AISystemConfigGroup{}, &data, map[string]string{"name": "name", "code": "code"}, map[string]string{}, "sort ASC, id ASC")
 }
 
-func CreateConfigGroup(data map[string]interface{}) (*systemModel.AISystemConfigGroup, error) {
-	return createSimple[systemModel.AISystemConfigGroup]("ai_system_config_group", data, configGroupColumns())
+func CreateConfigGroup(payload systemRequest.ConfigGroupPayload) (*systemModel.AISystemConfigGroup, error) {
+	return createRow[systemModel.AISystemConfigGroup]("ai_system_config_group", configGroupPayloadData(payload))
 }
 
-func UpdateConfigGroup(id string, data map[string]interface{}) (*systemModel.AISystemConfigGroup, error) {
-	return updateSimple[systemModel.AISystemConfigGroup]("ai_system_config_group", id, data, configGroupColumns())
+func UpdateConfigGroup(id string, payload systemRequest.ConfigGroupPayload) (*systemModel.AISystemConfigGroup, error) {
+	return updateRow[systemModel.AISystemConfigGroup]("ai_system_config_group", id, configGroupPayloadData(payload))
 }
 
 func DeleteConfigGroup(id string) error {
@@ -54,25 +55,24 @@ func ConfigInfo(code string) (map[string]string, error) {
 	return result, nil
 }
 
-func BatchUpdateConfig(groupID uint, configs []map[string]interface{}) error {
+func BatchUpdateConfig(payload systemRequest.BatchUpdateConfigPayload) error {
 	db, err := systemDB()
 	if err != nil {
 		return err
 	}
 	return db.Transaction(func(tx *gorm.DB) error {
-		for _, item := range configs {
-			id := item["id"]
-			payload := requestData(item, configColumns())
-			payload["group_id"] = groupID
-			setDefaultTimes(payload, false)
-			if id == nil {
-				setDefaultTimes(payload, true)
-				if err := tx.Model(&systemModel.AISystemConfig{}).Create(payload).Error; err != nil {
+		for _, item := range payload.Config {
+			data := configPayloadData(item)
+			data["group_id"] = payload.GroupID
+			setDefaultTimes(data, false)
+			if item.ID == nil {
+				setDefaultTimes(data, true)
+				if err := tx.Model(&systemModel.AISystemConfig{}).Create(data).Error; err != nil {
 					return err
 				}
 				continue
 			}
-			if err := tx.Model(&systemModel.AISystemConfig{}).Where("id = ?", id).Updates(payload).Error; err != nil {
+			if err := tx.Model(&systemModel.AISystemConfig{}).Where("id = ?", *item.ID).Updates(data).Error; err != nil {
 				return err
 			}
 		}
@@ -80,22 +80,39 @@ func BatchUpdateConfig(groupID uint, configs []map[string]interface{}) error {
 	})
 }
 
-func CreateConfig(data map[string]interface{}) (*systemModel.AISystemConfig, error) {
-	return createSimple[systemModel.AISystemConfig]("ai_system_config", data, configColumns())
+func CreateConfig(payload systemRequest.ConfigPayload) (*systemModel.AISystemConfig, error) {
+	return createRow[systemModel.AISystemConfig]("ai_system_config", configPayloadData(payload))
 }
 
-func UpdateConfig(id string, data map[string]interface{}) (*systemModel.AISystemConfig, error) {
-	return updateSimple[systemModel.AISystemConfig]("ai_system_config", id, data, configColumns())
+func UpdateConfig(id string, payload systemRequest.ConfigPayload) (*systemModel.AISystemConfig, error) {
+	return updateRow[systemModel.AISystemConfig]("ai_system_config", id, configPayloadData(payload))
 }
 
 func DeleteConfig(id string) error {
 	return deleteByID(&systemModel.AISystemConfig{}, id)
 }
 
-func configColumns() map[string]string {
-	return map[string]string{"groupId": "group_id", "group_id": "group_id", "key": "key", "value": "value", "name": "name", "inputType": "input_type", "input_type": "input_type", "configSelectData": "config_select_data", "config_select_data": "config_select_data", "sort": "sort", "remark": "remark"}
+func configPayloadData(payload systemRequest.ConfigPayload) map[string]interface{} {
+	data := map[string]interface{}{}
+	setColumn(data, "group_id", payload.GroupID)
+	setColumn(data, "key", payload.Key)
+	setColumn(data, "name", payload.Name)
+	setColumn(data, "input_type", payload.InputType)
+	setColumn(data, "config_select_data", payload.ConfigSelectData)
+	setColumn(data, "sort", payload.Sort)
+	setColumn(data, "remark", payload.Remark)
+	// value 可能是字符串或数字（radio/select 组件），统一走 normalizeValue 归一化。
+	if payload.Value != nil {
+		data["value"] = normalizeValue(payload.Value)
+	}
+	return data
 }
 
-func configGroupColumns() map[string]string {
-	return map[string]string{"name": "name", "code": "code", "sort": "sort", "remark": "remark"}
+func configGroupPayloadData(payload systemRequest.ConfigGroupPayload) map[string]interface{} {
+	data := map[string]interface{}{}
+	setColumn(data, "name", payload.Name)
+	setColumn(data, "code", payload.Code)
+	setColumn(data, "sort", payload.Sort)
+	setColumn(data, "remark", payload.Remark)
+	return data
 }

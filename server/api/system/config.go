@@ -3,7 +3,6 @@ package system
 import (
 	systemRequest "server/model/system/request"
 	systemService "server/service/system"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,22 +13,20 @@ func ConfigGroupList(c *gin.Context) {
 }
 
 func CreateConfigGroup(c *gin.Context) {
-	var payload systemRequest.ConfigGroupPayload
-	data, ok := bindJSONStructAsMap(c, &payload)
+	payload, ok := bindJSON[systemRequest.ConfigGroupPayload](c)
 	if !ok {
 		return
 	}
-	result, err := systemService.CreateConfigGroup(data)
+	result, err := systemService.CreateConfigGroup(payload)
 	successOrFail(c, result, err)
 }
 
 func UpdateConfigGroup(c *gin.Context) {
-	var payload systemRequest.ConfigGroupPayload
-	data, ok := bindJSONStructAsMap(c, &payload)
+	payload, ok := bindJSON[systemRequest.ConfigGroupPayload](c)
 	if !ok {
 		return
 	}
-	result, err := systemService.UpdateConfigGroup(c.Param("id"), data)
+	result, err := systemService.UpdateConfigGroup(c.Param("id"), payload)
 	successOrFail(c, result, err)
 }
 
@@ -43,22 +40,20 @@ func ConfigList(c *gin.Context) {
 }
 
 func CreateConfig(c *gin.Context) {
-	var payload systemRequest.ConfigPayload
-	data, ok := bindJSONStructAsMap(c, &payload)
+	payload, ok := bindJSON[systemRequest.ConfigPayload](c)
 	if !ok {
 		return
 	}
-	result, err := systemService.CreateConfig(data)
+	result, err := systemService.CreateConfig(payload)
 	successOrFail(c, result, err)
 }
 
 func UpdateConfig(c *gin.Context) {
-	var payload systemRequest.ConfigPayload
-	data, ok := bindJSONStructAsMap(c, &payload)
+	payload, ok := bindJSON[systemRequest.ConfigPayload](c)
 	if !ok {
 		return
 	}
-	result, err := systemService.UpdateConfig(c.Param("id"), data)
+	result, err := systemService.UpdateConfig(c.Param("id"), payload)
 	successOrFail(c, result, err)
 }
 
@@ -72,24 +67,9 @@ func ConfigInfo(c *gin.Context) {
 }
 
 func BatchUpdateConfig(c *gin.Context) {
-	var payload systemRequest.BatchUpdateConfigPayload
-	data, ok := bindJSONStructAsMap(c, &payload)
+	payload, ok := bindJSON[systemRequest.BatchUpdateConfigPayload](c)
 	if !ok {
 		return
 	}
-	groupID := uint64(0)
-	switch value := data["group_id"].(type) {
-	case float64:
-		groupID = uint64(value)
-	case string:
-		groupID, _ = strconv.ParseUint(value, 10, 64)
-	}
-	items, _ := data["config"].([]interface{})
-	configs := make([]map[string]interface{}, 0, len(items))
-	for _, item := range items {
-		if m, ok := item.(map[string]interface{}); ok {
-			configs = append(configs, m)
-		}
-	}
-	successOrFail(c, true, systemService.BatchUpdateConfig(uint(groupID), configs))
+	successOrFail(c, true, systemService.BatchUpdateConfig(payload))
 }

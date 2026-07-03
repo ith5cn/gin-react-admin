@@ -1,6 +1,7 @@
 package system
 
 import (
+	systemRequest "server/model/system/request"
 	systemService "server/service/system"
 
 	"github.com/gin-gonic/gin"
@@ -12,20 +13,20 @@ func MenuList(c *gin.Context) {
 }
 
 func CreateMenu(c *gin.Context) {
-	data, ok := bindJSONMap(c)
+	payload, ok := bindJSON[systemRequest.MenuPayload](c)
 	if !ok {
 		return
 	}
-	result, err := systemService.CreateMenu(data)
+	result, err := systemService.CreateMenu(payload)
 	successOrFail(c, result, err)
 }
 
 func UpdateMenu(c *gin.Context) {
-	data, ok := bindJSONMap(c)
+	payload, ok := bindJSON[systemRequest.MenuPayload](c)
 	if !ok {
 		return
 	}
-	result, err := systemService.UpdateMenu(c.Param("id"), data)
+	result, err := systemService.UpdateMenu(c.Param("id"), payload)
 	successOrFail(c, result, err)
 }
 

@@ -3,6 +3,7 @@ package system
 import (
 	commonResponse "server/model/common/response"
 	systemModel "server/model/system"
+	systemRequest "server/model/system/request"
 )
 
 func PostList(query map[string]string) (*commonResponse.PageResult, error) {
@@ -20,18 +21,24 @@ func PostAccess() ([]systemModel.AISystemPost, error) {
 	return posts, err
 }
 
-func CreatePost(data map[string]interface{}) (*systemModel.AISystemPost, error) {
-	return createSimple[systemModel.AISystemPost]("ai_system_post", data, simpleColumns())
+func CreatePost(payload systemRequest.PostPayload) (*systemModel.AISystemPost, error) {
+	return createRow[systemModel.AISystemPost]("ai_system_post", postPayloadData(payload))
 }
 
-func UpdatePost(id string, data map[string]interface{}) (*systemModel.AISystemPost, error) {
-	return updateSimple[systemModel.AISystemPost]("ai_system_post", id, data, simpleColumns())
+func UpdatePost(id string, payload systemRequest.PostPayload) (*systemModel.AISystemPost, error) {
+	return updateRow[systemModel.AISystemPost]("ai_system_post", id, postPayloadData(payload))
 }
 
 func DeletePost(id string) error {
 	return deleteByID(&systemModel.AISystemPost{}, id)
 }
 
-func simpleColumns() map[string]string {
-	return map[string]string{"name": "name", "code": "code", "sort": "sort", "status": "status", "remark": "remark"}
+func postPayloadData(payload systemRequest.PostPayload) map[string]interface{} {
+	data := map[string]interface{}{}
+	setColumn(data, "name", payload.Name)
+	setColumn(data, "code", payload.Code)
+	setColumn(data, "sort", payload.Sort)
+	setColumn(data, "status", payload.Status)
+	setColumn(data, "remark", payload.Remark)
+	return data
 }

@@ -36,11 +36,11 @@ func PageList(query map[string]string, model interface{}, dest interface{}, like
 }
 
 func CreateRecord[T any](table string, data map[string]interface{}) (*T, error) {
-	return createSimple[T](table, data, passthroughColumns(data))
+	return createRow[T](table, requestData(data, passthroughColumns(data)))
 }
 
 func UpdateRecord[T any](table string, id string, data map[string]interface{}) (*T, error) {
-	return updateSimple[T](table, id, data, passthroughColumns(data))
+	return updateRow[T](table, id, requestData(data, passthroughColumns(data)))
 }
 
 func DeleteRecord(model interface{}, id string) error {
@@ -72,12 +72,18 @@ func createWithLevel[T any](table string, payload map[string]interface{}) (*T, e
 	return &result, nil
 }
 
-func createSimple[T any](table string, data map[string]interface{}, allowed map[string]string) (*T, error) {
+// setColumn 在 value 非 nil 时把解引用后的值写入 payload，用于类型化入参转 GORM 更新 map。
+func setColumn[T any](payload map[string]interface{}, column string, value *T) {
+	if value != nil {
+		payload[column] = *value
+	}
+}
+
+func createRow[T any](table string, payload map[string]interface{}) (*T, error) {
 	db, err := systemDB()
 	if err != nil {
 		return nil, err
 	}
-	payload := requestData(data, allowed)
 	setDefaultTimes(payload, true)
 	if err := db.Table(table).Create(payload).Error; err != nil {
 		return nil, err
@@ -89,12 +95,11 @@ func createSimple[T any](table string, data map[string]interface{}, allowed map[
 	return &result, nil
 }
 
-func updateSimple[T any](table string, id string, data map[string]interface{}, allowed map[string]string) (*T, error) {
+func updateRow[T any](table string, id string, payload map[string]interface{}) (*T, error) {
 	db, err := systemDB()
 	if err != nil {
 		return nil, err
 	}
-	payload := requestData(data, allowed)
 	setDefaultTimes(payload, false)
 	if err := db.Table(table).Where("id = ?", id).Updates(payload).Error; err != nil {
 		return nil, err
@@ -143,25 +148,4 @@ func normalizeParentAndLevel(db *gorm.DB, table string, payload map[string]inter
 func parseUint(value string) (uint, error) {
 	id, err := strconv.ParseUint(value, 10, 64)
 	return uint(id), err
-}
-
-func idsFromAny(value interface{}) []uint {
-	items, ok := value.([]interface{})
-	if !ok {
-		return []uint{}
-	}
-	result := make([]uint, 0, len(items))
-	for _, item := range items {
-		switch v := item.(type) {
-		case float64:
-			result = append(result, uint(v))
-		case int:
-			result = append(result, uint(v))
-		case string:
-			if id, err := parseUint(v); err == nil {
-				result = append(result, id)
-			}
-		}
-	}
-	return result
 }

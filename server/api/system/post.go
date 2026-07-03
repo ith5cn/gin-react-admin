@@ -18,22 +18,20 @@ func PostAccess(c *gin.Context) {
 }
 
 func CreatePost(c *gin.Context) {
-	var payload systemRequest.PostPayload
-	data, ok := bindJSONStructAsMap(c, &payload)
+	payload, ok := bindJSON[systemRequest.PostPayload](c)
 	if !ok {
 		return
 	}
-	result, err := systemService.CreatePost(data)
+	result, err := systemService.CreatePost(payload)
 	successOrFail(c, result, err)
 }
 
 func UpdatePost(c *gin.Context) {
-	var payload systemRequest.PostPayload
-	data, ok := bindJSONStructAsMap(c, &payload)
+	payload, ok := bindJSON[systemRequest.PostPayload](c)
 	if !ok {
 		return
 	}
-	result, err := systemService.UpdatePost(c.Param("id"), data)
+	result, err := systemService.UpdatePost(c.Param("id"), payload)
 	successOrFail(c, result, err)
 }
 

@@ -13,7 +13,7 @@ interface RoleEditProps {
 
 interface RoleFormData {
     id?: number;
-    parent_id?: number | null;
+    parentId?: number | null;
     name: string;
     code: string;
     dataScope: number;
@@ -24,7 +24,7 @@ interface RoleFormData {
 
 // 表单初始值
 const initialFormData: RoleFormData = {
-    parent_id: null,
+    parentId: null,
     name: '',
     code: '',
     dataScope: 1,
@@ -71,7 +71,7 @@ const RoleEdit = forwardRef<RoleEditRef, RoleEditProps>(({ onSuccess }, ref) => 
         if (type === 'edit' && data) {
             form.setFieldsValue({
                 ...data,
-                parent_id: data.parentId || null,
+                parentId: data.parentId ?? null,
             });
         } else {
             form.setFieldsValue({ ...initialFormData });
@@ -132,7 +132,7 @@ const RoleEdit = forwardRef<RoleEditRef, RoleEditProps>(({ onSuccess }, ref) => 
                 <Row gutter={16}>
                     <Col span={24}>
                         <Form.Item
-                            name="parent_id"
+                            name="parentId"
                             label="上级角色"
                             labelCol={{ span: 3 }}
                             wrapperCol={{ span: 21 }}

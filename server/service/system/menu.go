@@ -3,6 +3,7 @@ package system
 import (
 	"errors"
 	systemModel "server/model/system"
+	systemRequest "server/model/system/request"
 )
 
 func MenuList(query map[string]string) (map[string]interface{}, error) {
@@ -19,14 +20,12 @@ func MenuList(query map[string]string) (map[string]interface{}, error) {
 	return map[string]interface{}{"data": BuildMenuTree(menus)}, nil
 }
 
-func CreateMenu(data map[string]interface{}) (*systemModel.AISystemMenu, error) {
-	payload := requestData(data, menuColumns())
-	return createWithLevel[systemModel.AISystemMenu]("ai_system_menu", payload)
+func CreateMenu(payload systemRequest.MenuPayload) (*systemModel.AISystemMenu, error) {
+	return createWithLevel[systemModel.AISystemMenu]("ai_system_menu", menuPayloadData(payload))
 }
 
-func UpdateMenu(id string, data map[string]interface{}) (*systemModel.AISystemMenu, error) {
-	payload := requestData(data, menuColumns())
-	return updateWithLevel[systemModel.AISystemMenu]("ai_system_menu", id, payload)
+func UpdateMenu(id string, payload systemRequest.MenuPayload) (*systemModel.AISystemMenu, error) {
+	return updateWithLevel[systemModel.AISystemMenu]("ai_system_menu", id, menuPayloadData(payload))
 }
 
 func DeleteMenu(id string) error {
@@ -121,6 +120,20 @@ func BuildMenuTree(menus []systemModel.AISystemMenu) []*systemModel.AISystemMenu
 	return roots
 }
 
-func menuColumns() map[string]string {
-	return map[string]string{"parentId": "parent_id", "name": "name", "code": "code", "icon": "icon", "route": "route", "component": "component", "redirect": "redirect", "isHidden": "is_hidden", "isLayout": "is_layout", "type": "type", "status": "status", "sort": "sort", "remark": "remark"}
+func menuPayloadData(payload systemRequest.MenuPayload) map[string]interface{} {
+	data := map[string]interface{}{}
+	setColumn(data, "parent_id", payload.ParentID)
+	setColumn(data, "name", payload.Name)
+	setColumn(data, "code", payload.Code)
+	setColumn(data, "icon", payload.Icon)
+	setColumn(data, "route", payload.Route)
+	setColumn(data, "component", payload.Component)
+	setColumn(data, "redirect", payload.Redirect)
+	setColumn(data, "is_hidden", payload.IsHidden)
+	setColumn(data, "is_layout", payload.IsLayout)
+	setColumn(data, "type", payload.Type)
+	setColumn(data, "status", payload.Status)
+	setColumn(data, "sort", payload.Sort)
+	setColumn(data, "remark", payload.Remark)
+	return data
 }

@@ -33,11 +33,11 @@ func CodegenImportTables(c *gin.Context) {
 }
 
 func CodegenDelete(c *gin.Context) {
-	data, ok := bindJSONMap(c)
+	payload, ok := bindJSON[systemRequest.IDsPayload](c)
 	if !ok {
 		return
 	}
-	successOrFail(c, map[string]interface{}{}, systemService.CodegenDelete(systemServiceIDs(data["ids"])))
+	successOrFail(c, map[string]interface{}{}, systemService.CodegenDelete(payload.IDs))
 }
 
 func CodegenDetail(c *gin.Context) {

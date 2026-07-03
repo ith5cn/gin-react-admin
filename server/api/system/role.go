@@ -13,22 +13,20 @@ func RoleList(c *gin.Context) {
 }
 
 func CreateRole(c *gin.Context) {
-	var payload systemRequest.RolePayload
-	data, ok := bindJSONStructAsMap(c, &payload)
+	payload, ok := bindJSON[systemRequest.RolePayload](c)
 	if !ok {
 		return
 	}
-	result, err := systemService.CreateRole(data)
+	result, err := systemService.CreateRole(payload)
 	successOrFail(c, result, err)
 }
 
 func UpdateRole(c *gin.Context) {
-	var payload systemRequest.RolePayload
-	data, ok := bindJSONStructAsMap(c, &payload)
+	payload, ok := bindJSON[systemRequest.RolePayload](c)
 	if !ok {
 		return
 	}
-	result, err := systemService.UpdateRole(c.Param("id"), data)
+	result, err := systemService.UpdateRole(c.Param("id"), payload)
 	successOrFail(c, result, err)
 }
 
@@ -37,9 +35,8 @@ func DeleteRole(c *gin.Context) {
 }
 
 func BindRoleMenu(c *gin.Context) {
-	var payload systemRequest.RoleMenuPayload
-	if err := c.ShouldBindJSON(&payload); err != nil {
-		successOrFail(c, nil, err)
+	payload, ok := bindJSON[systemRequest.IDsPayload](c)
+	if !ok {
 		return
 	}
 	successOrFail(c, true, systemService.BindRoleMenus(c.Param("id"), payload.IDs))

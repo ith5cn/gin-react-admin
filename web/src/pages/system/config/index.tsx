@@ -43,12 +43,12 @@ interface ConfigGroupRecord {
 
 interface ConfigRecord {
   id: number;
-  group_id: number;
+  groupId: number;
   name: string;
   key: string;
   value: any;
-  input_type: string;
-  config_select_data?: any;
+  inputType: string;
+  configSelectData?: any;
   sort?: number;
   remark?: string;
   display?: boolean;
@@ -147,7 +147,7 @@ const ConfigIndex = () => {
     setLoading(true);
     try {
       const res = await getConfigListApi({
-        group_id: groupId,
+        groupId,
         orderBy: "sort",
         orderType: "DESC",
       });
@@ -198,15 +198,15 @@ const ConfigIndex = () => {
   const handleSave = async () => {
     if (!currentGroupId || configRows.length === 0) return;
     await configBatchUpdateApi({
-      group_id: currentGroupId,
+      groupId: currentGroupId,
       config: configRows.map((item) => ({
         id: item.id,
-        group_id: item.group_id,
+        groupId: item.groupId,
         name: item.name,
         key: item.key,
         value: item.value,
-        input_type: item.input_type,
-        config_select_data: item.config_select_data,
+        inputType: item.inputType,
+        configSelectData: item.configSelectData,
         sort: item.sort,
         remark: item.remark,
       })),
@@ -233,11 +233,11 @@ const ConfigIndex = () => {
   };
 
   const renderConfigInput = (item: ConfigRecord) => {
-    if (item.input_type === "select") {
+    if (item.inputType === "select") {
       return (
         <Select
           value={item.value}
-          options={parseOptions(item.config_select_data)}
+          options={parseOptions(item.configSelectData)}
           placeholder={`请选择${item.name}`}
           onChange={(value) => handleValueChange(item.id, value)}
           allowClear
@@ -245,17 +245,17 @@ const ConfigIndex = () => {
       );
     }
 
-    if (item.input_type === "radio") {
+    if (item.inputType === "radio") {
       return (
         <Radio.Group
           value={item.value}
-          options={parseOptions(item.config_select_data)}
+          options={parseOptions(item.configSelectData)}
           onChange={(e) => handleValueChange(item.id, e.target.value)}
         />
       );
     }
 
-    if (item.input_type === "textarea") {
+    if (item.inputType === "textarea") {
       return (
         <Input.TextArea
           rows={4}
@@ -266,15 +266,15 @@ const ConfigIndex = () => {
       );
     }
 
-    if (item.input_type === "uploadImage") {
+    if (item.inputType === "uploadImage") {
       return <ImageUpload value={item.value} onChange={(value) => handleValueChange(item.id, value)} />;
     }
 
-    if (item.input_type === "uploadFile") {
+    if (item.inputType === "uploadFile") {
       return <FileUpload value={item.value} onChange={(value) => handleValueChange(item.id, value)} />;
     }
 
-    if (item.input_type === "wangEditor") {
+    if (item.inputType === "wangEditor") {
       return <WangEditor value={item.value || ""} onChange={(value) => handleValueChange(item.id, value)} />;
     }
 
@@ -362,7 +362,7 @@ const ConfigIndex = () => {
                   <Button
                     type="primary"
                     icon={<PlusOutlined />}
-                    onClick={() => configItemEditRef.current?.open("add", { group_id: currentGroup.id })}
+                    onClick={() => configItemEditRef.current?.open("add", { groupId: currentGroup.id })}
                   >
                     新增配置
                   </Button>

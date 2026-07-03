@@ -3,6 +3,7 @@ package system
 import (
 	commonResponse "server/model/common/response"
 	systemModel "server/model/system"
+	systemRequest "server/model/system/request"
 )
 
 func DictTypeList(query map[string]string) (*commonResponse.PageResult, error) {
@@ -10,12 +11,12 @@ func DictTypeList(query map[string]string) (*commonResponse.PageResult, error) {
 	return pageList(query, &systemModel.AISystemDictType{}, &data, map[string]string{"name": "name", "code": "code"}, map[string]string{"status": "status"}, "id ASC")
 }
 
-func CreateDictType(data map[string]interface{}) (*systemModel.AISystemDictType, error) {
-	return createSimple[systemModel.AISystemDictType]("ai_system_dict_type", data, dictTypeColumns())
+func CreateDictType(payload systemRequest.DictTypePayload) (*systemModel.AISystemDictType, error) {
+	return createRow[systemModel.AISystemDictType]("ai_system_dict_type", dictTypePayloadData(payload))
 }
 
-func UpdateDictType(id string, data map[string]interface{}) (*systemModel.AISystemDictType, error) {
-	return updateSimple[systemModel.AISystemDictType]("ai_system_dict_type", id, data, dictTypeColumns())
+func UpdateDictType(id string, payload systemRequest.DictTypePayload) (*systemModel.AISystemDictType, error) {
+	return updateRow[systemModel.AISystemDictType]("ai_system_dict_type", id, dictTypePayloadData(payload))
 }
 
 func DeleteDictType(id string) error {
@@ -46,22 +47,36 @@ func DictAll() (map[string][]systemModel.AISystemDictData, error) {
 	return result, nil
 }
 
-func CreateDictData(data map[string]interface{}) (*systemModel.AISystemDictData, error) {
-	return createSimple[systemModel.AISystemDictData]("ai_system_dict_data", data, dictDataColumns())
+func CreateDictData(payload systemRequest.DictDataPayload) (*systemModel.AISystemDictData, error) {
+	return createRow[systemModel.AISystemDictData]("ai_system_dict_data", dictDataPayloadData(payload))
 }
 
-func UpdateDictData(id string, data map[string]interface{}) (*systemModel.AISystemDictData, error) {
-	return updateSimple[systemModel.AISystemDictData]("ai_system_dict_data", id, data, dictDataColumns())
+func UpdateDictData(id string, payload systemRequest.DictDataPayload) (*systemModel.AISystemDictData, error) {
+	return updateRow[systemModel.AISystemDictData]("ai_system_dict_data", id, dictDataPayloadData(payload))
 }
 
 func DeleteDictData(id string) error {
 	return deleteByID(&systemModel.AISystemDictData{}, id)
 }
 
-func dictTypeColumns() map[string]string {
-	return map[string]string{"name": "name", "code": "code", "status": "status", "remark": "remark"}
+func dictTypePayloadData(payload systemRequest.DictTypePayload) map[string]interface{} {
+	data := map[string]interface{}{}
+	setColumn(data, "name", payload.Name)
+	setColumn(data, "code", payload.Code)
+	setColumn(data, "status", payload.Status)
+	setColumn(data, "remark", payload.Remark)
+	return data
 }
 
-func dictDataColumns() map[string]string {
-	return map[string]string{"typeId": "type_id", "type_id": "type_id", "label": "label", "value": "value", "color": "color", "code": "code", "sort": "sort", "status": "status", "remark": "remark"}
+func dictDataPayloadData(payload systemRequest.DictDataPayload) map[string]interface{} {
+	data := map[string]interface{}{}
+	setColumn(data, "type_id", payload.TypeID)
+	setColumn(data, "label", payload.Label)
+	setColumn(data, "value", payload.Value)
+	setColumn(data, "color", payload.Color)
+	setColumn(data, "code", payload.Code)
+	setColumn(data, "sort", payload.Sort)
+	setColumn(data, "status", payload.Status)
+	setColumn(data, "remark", payload.Remark)
+	return data
 }
