@@ -32,5 +32,8 @@ func BaseRouter(PublicGroup, PrivateGroup *gin.RouterGroup) {
 	codegenRoutes(system)
 	uploadRoutes(system)
 	profileRoutes(system)
+	crontabRoutes(system)
+	regionRoutes(system)
+	onlineRoutes(system)
 	databaseRoutes(PrivateGroup)
 }

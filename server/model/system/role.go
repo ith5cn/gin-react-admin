@@ -36,3 +36,15 @@ type AISystemUserRole struct {
 func (AISystemUserRole) TableName() string {
 	return "ai_system_user_role"
 }
+
+// AISystemRoleDept 映射 ai_system_role_dept 角色部门关联表。
+// 只在角色 data_scope=2（自定义数据权限）时使用，记录该角色可见的部门集合。
+type AISystemRoleDept struct {
+	ID     uint `gorm:"column:id;primaryKey"` // 关联ID。
+	RoleID uint `gorm:"column:role_id"`       // 角色ID。
+	DeptID uint `gorm:"column:dept_id"`       // 部门ID。
+}
+
+func (AISystemRoleDept) TableName() string {
+	return "ai_system_role_dept"
+}

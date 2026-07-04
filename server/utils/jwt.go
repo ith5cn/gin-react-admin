@@ -41,10 +41,13 @@ type CustomClaims struct {
 
 // TokenPair 是登录成功后返回给前端的一组 token。
 // access_token 用于访问接口，refresh_token 用于 access_token 过期后的续签。
+// 两个 JTI 字段只在服务端内部使用（在线用户会话记录），不下发给前端。
 type TokenPair struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 	ExpiresIn    int64  `json:"expires_in"`
+	AccessJTI    string `json:"-"`
+	RefreshJTI   string `json:"-"`
 }
 
 // GenerateToken 签发一组新的 access token 和 refresh token，并把 token 状态写入 Redis。
@@ -80,7 +83,9 @@ func GenerateToken(userID uint, username string) (*TokenPair, error) {
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		// expires_in 只表示 access token 的剩余有效秒数，方便前端做刷新判断。
-		ExpiresIn: int64(accessExpires.Seconds()),
+		ExpiresIn:  int64(accessExpires.Seconds()),
+		AccessJTI:  accessJTI,
+		RefreshJTI: refreshJTI,
 	}, nil
 }
 
@@ -261,9 +266,15 @@ func validateTokenState(claims *CustomClaims) error {
 	return nil
 }
 
-// tokenKey 是每个 token 自身状态的 Redis key。
-func tokenKey(tokenType string, jti string) string {
+// TokenStateKey 返回 token 状态在 Redis 中的 key。
+// 导出给在线用户管理使用（踢下线需要按 jti 删除对应 key）。
+func TokenStateKey(tokenType string, jti string) string {
 	return fmt.Sprintf("jwt:%s:%s", tokenType, jti)
+}
+
+// tokenKey 是 TokenStateKey 的包内简写。
+func tokenKey(tokenType string, jti string) string {
+	return TokenStateKey(tokenType, jti)
 }
 
 // userTokenKey 是单一登录模式下记录用户当前有效 token 的 Redis key。

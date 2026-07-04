@@ -31,7 +31,27 @@ func Login(userName string, password string, clientIP string, userAgent string) 
 	}
 	RecordLoginLog(userName, clientIP, userAgent, err == nil, message)
 
+	if err == nil {
+		if claims, parseErr := utils.ParseToken(tokens.AccessToken); parseErr == nil {
+			// 在线用户会话记录：按 access token 的 jti 存 Redis，供在线用户管理查询/踢下线。
+			RecordOnlineSession(tokens, claims.UserID, claims.Username, clientIP, userAgent)
+		}
+	}
+
 	return tokens, err
+}
+
+// RefreshLogin 刷新 token 并同步登记新的在线会话。
+// 旧 access token 的会话记录不删：多端登录模式下旧 token 到期前仍然有效，让它随 TTL 自然过期。
+func RefreshLogin(refreshToken string, clientIP string, userAgent string) (*utils.TokenPair, error) {
+	tokens, err := utils.RefreshToken(refreshToken)
+	if err != nil {
+		return nil, err
+	}
+	if claims, parseErr := utils.ParseToken(tokens.AccessToken); parseErr == nil {
+		RecordOnlineSession(tokens, claims.UserID, claims.Username, clientIP, userAgent)
+	}
+	return tokens, nil
 }
 
 func loginInternal(userName string, password string) (*utils.TokenPair, error) {

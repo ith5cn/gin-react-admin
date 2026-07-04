@@ -1,6 +1,7 @@
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { Form, Input, InputNumber, message, Modal, Radio, Row, Col, TreeSelect, Select } from "antd";
-import { roleCreateApi, roleListApi, roleUpdateApi } from "@/api/system/role";
+import { roleCreateApi, roleDeptApi, roleListApi, roleUpdateApi } from "@/api/system/role";
+import { deptListApi } from "@/api/system/dept";
 
 export interface RoleEditRef {
     open: (type?: 'add' | 'edit', data?: Record<string, unknown>) => void;
@@ -23,6 +24,7 @@ interface RoleFormData {
     name: string;
     code: string;
     dataScope: number;
+    deptIds?: number[];
     sort: number;
     status: number;
     remark?: string;
@@ -34,6 +36,7 @@ const initialFormData: RoleFormData = {
     name: '',
     code: '',
     dataScope: 1,
+    deptIds: [],
     sort: 100,
     status: 1,
     remark: '',
@@ -53,6 +56,9 @@ const RoleEdit = forwardRef<RoleEditRef, RoleEditProps>(({ onSuccess }, ref) => 
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [roleTreeData, setRoleTreeData] = useState<RoleTreeNode[]>([]);
+    const [deptTreeData, setDeptTreeData] = useState<RoleTreeNode[]>([]);
+    // 监听数据范围选择，选"自定义数据权限"时才显示部门选择
+    const dataScope = Form.useWatch('dataScope', form);
 
     const title = '角色管理' + (mode === 'edit' ? ' - 编辑' : ' - 新增');
 
@@ -70,6 +76,30 @@ const RoleEdit = forwardRef<RoleEditRef, RoleEditProps>(({ onSuccess }, ref) => 
         }
     };
 
+    // 获取部门树数据（自定义数据权限的部门选择用）
+    const fetchDeptTree = async () => {
+        try {
+            const res = await deptListApi();
+            if (res.data?.list || res.data?.data) {
+                setDeptTreeData(res.data.list || res.data.data);
+            } else {
+                setDeptTreeData(res.data || []);
+            }
+        } catch {
+            setDeptTreeData([]);
+        }
+    };
+
+    // 获取角色已授权的部门（编辑回显）
+    const fetchRoleDepts = async (roleId: number) => {
+        try {
+            const res = await roleDeptApi(roleId);
+            form.setFieldsValue({ deptIds: res.data || [] });
+        } catch {
+            form.setFieldsValue({ deptIds: [] });
+        }
+    };
+
     // 打开弹框
     const open = async (type: 'add' | 'edit' = 'add', data?: Record<string, unknown>) => {
         setMode(type);
@@ -79,11 +109,14 @@ const RoleEdit = forwardRef<RoleEditRef, RoleEditProps>(({ onSuccess }, ref) => 
                 ...data,
                 parentId: (data.parentId as number | null | undefined) ?? null,
             });
+            if (data.id) {
+                fetchRoleDepts(data.id as number);
+            }
         } else {
             form.setFieldsValue({ ...initialFormData });
         }
         setVisible(true);
-        await fetchRoleTree();
+        await Promise.all([fetchRoleTree(), fetchDeptTree()]);
     };
 
     // 设置表单数据（新增子角色时使用）
@@ -180,6 +213,26 @@ const RoleEdit = forwardRef<RoleEditRef, RoleEditProps>(({ onSuccess }, ref) => 
                             />
                         </Form.Item>
                     </Col>
+                    {dataScope === 2 && (
+                        <Col span={24}>
+                            <Form.Item
+                                name="deptIds"
+                                label="授权部门"
+                                labelCol={{ span: 3 }}
+                                wrapperCol={{ span: 21 }}
+                            >
+                                <TreeSelect
+                                    treeData={deptTreeData}
+                                    fieldNames={{ label: 'name', value: 'id', children: 'children' }}
+                                    multiple
+                                    treeCheckable
+                                    showCheckedStrategy={TreeSelect.SHOW_ALL}
+                                    allowClear
+                                    placeholder="请选择该角色可见的部门"
+                                />
+                            </Form.Item>
+                        </Col>
+                    )}
                     <Col span={12}>
                         <Form.Item
                             name="sort"

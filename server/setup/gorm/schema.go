@@ -1,6 +1,10 @@
 package gormInit
 
-import "gorm.io/gorm"
+import (
+	"strconv"
+
+	"gorm.io/gorm"
+)
 
 // ensureAISystemSchema 在启动时做轻量 schema 自检/补齐：
 // 给早期版本缺失的列补 ALTER，并确保代码生成器的两张配置表存在。
@@ -84,6 +88,85 @@ CREATE TABLE IF NOT EXISTS nest_tool_generate_columns (
 		return err
 	}
 
+	if err := ensureRoleDeptTable(db); err != nil {
+		return err
+	}
+
+	// 定时任务菜单的 component 旧值指向不存在的前端路径，修正到实际页面位置（幂等）。
+	if err := db.Exec("UPDATE `ai_system_menu` SET `component` = 'system/tool/crontab/index' WHERE `component` = 'tool/crontab/index'").Error; err != nil {
+		return err
+	}
+
+	return ensureOnlineUserMenu(db)
+}
+
+// ensureRoleDeptTable 创建角色-部门关联表（自定义数据权限用），幂等。
+func ensureRoleDeptTable(db *gorm.DB) error {
+	return db.Exec(`
+CREATE TABLE IF NOT EXISTS ai_system_role_dept (
+  id int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+  role_id int unsigned NOT NULL COMMENT '角色ID',
+  dept_id int unsigned NOT NULL COMMENT '部门ID',
+  PRIMARY KEY (id),
+  KEY idx_role_id (role_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='角色部门关联表(自定义数据权限)';
+`).Error
+}
+
+// ensureOnlineUserMenu 为老库补齐"在线用户"菜单和按钮权限码，按 code 判重保证幂等。
+// 不用固定菜单 ID：老库里用户自建菜单可能已占用任何 ID，这里让数据库自增分配。
+func ensureOnlineUserMenu(db *gorm.DB) error {
+	var count int64
+	if err := db.Table("ai_system_menu").Where("code = ?", "system/online/index").Count(&count).Error; err != nil {
+		return err
+	}
+	if count > 0 {
+		return nil
+	}
+
+	// 挂到"监控"目录（seed 里 route='monitor'）下；找不到就挂根目录。
+	parentID := 0
+	parentLevel := "0"
+	var parent struct {
+		ID    int
+		Level *string
+	}
+	if err := db.Table("ai_system_menu").Select("id, level").
+		Where("route = ? AND type = 'M' AND delete_time IS NULL", "monitor").
+		Order("id ASC").Limit(1).Scan(&parent).Error; err == nil && parent.ID > 0 {
+		parentID = parent.ID
+		parentLevel = "0," + strconv.Itoa(parent.ID)
+		if parent.Level != nil && *parent.Level != "" {
+			parentLevel = *parent.Level + "," + strconv.Itoa(parent.ID)
+		}
+	}
+
+	if err := db.Exec(`INSERT INTO ai_system_menu
+  (parent_id, level, name, code, icon, route, component, redirect, is_hidden, is_layout, type, status, sort, remark, create_time, update_time)
+  VALUES (?, ?, '在线用户', 'monitor/online', 'TeamOutlined', 'monitor/online', 'system/monitor/online', NULL, 2, 1, 'M', 1, 30, '', NOW(), NOW())`,
+		parentID, parentLevel).Error; err != nil {
+		return err
+	}
+
+	var menuID int
+	if err := db.Table("ai_system_menu").Select("id").
+		Where("code = ?", "monitor/online").Order("id DESC").Limit(1).Scan(&menuID).Error; err != nil {
+		return err
+	}
+	childLevel := parentLevel + "," + strconv.Itoa(menuID)
+
+	buttons := []struct{ name, code string }{
+		{"在线用户列表", "system/online/index"},
+		{"在线用户强退", "system/online/kick"},
+	}
+	for _, button := range buttons {
+		if err := db.Exec(`INSERT INTO ai_system_menu
+  (parent_id, level, name, code, is_hidden, is_layout, type, status, sort, remark, create_time, update_time)
+  VALUES (?, ?, ?, ?, 2, 1, 'B', 1, 0, '', NOW(), NOW())`,
+			menuID, childLevel, button.name, button.code).Error; err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

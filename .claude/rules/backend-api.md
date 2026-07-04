@@ -44,3 +44,16 @@ model/           → GORM 结构体（system/）+ DTO（request/ response/）
 - 需要权限控制的接口在路由注册时挂 `middleware.Perm("<权限码>")`，权限码规范为 `system/<模块>/<动作>`（如 `system/user/create`），必须与菜单表 type='B' 记录的 code 一致
 - 仅登录即可的接口（当前用户上下文、下拉数据、上传、个人中心）不挂 Perm
 - 新增权限码时同步：菜单表按钮记录（`ai_system.sql` 种子 + 已有库数据）、前端页面 auth 数组
+
+## 数据权限（dataScope）
+
+- 行级可见性过滤在 service 层做：`UserDataScope(operatorID)` 算范围，`applyUserDataScope` 注入 GORM 查询（见 `service/system/datascope.go`）
+- operatorID 必须来自 JWT context（handler 用 `currentUserID(c)`），禁止接收前端传的用户 id
+- 角色 `data_scope` 为 NULL 时按 1（全部）处理，避免升级缩小老角色可见范围；多角色取并集
+- 新列表接入数据权限时复用上述两个函数，不要各自手写部门过滤
+
+## 定时任务
+
+- 任务增删改后必须调 `ReloadCrontabScheduler()` 同步调度器（service 层已封装，别绕过 service 直接写表）
+- cron 表达式创建/更新时用 `validateCrontabRule` 先校验；支持 5 段和 6 段（带秒）格式
+- 新增系统内部任务用 `RegisterCrontabTask(name, fn)` 注册，target 填注册名；任务函数自己兜底错误，不允许 panic 外逸

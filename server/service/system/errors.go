@@ -34,4 +34,7 @@ var (
 	ErrUploadEmptyFile    = NewBizError("上传文件内容为空")
 	ErrUploadNotImage     = NewBizError("文件内容不是有效的图片")
 	ErrOldPasswordWrong   = NewBizError("原密码不正确")
+	ErrCrontabNotFound    = NewBizError("定时任务不存在")
+	ErrCrontabRuleInvalid = NewBizError("cron 表达式无效")
+	ErrOnlineUserNotFound = NewBizError("在线会话不存在或已过期")
 )

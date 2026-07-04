@@ -6,6 +6,7 @@ import (
 	"server/model/common/code"
 	"server/model/common/response"
 	systemRequest "server/model/system/request"
+	systemService "server/service/system"
 	"server/utils"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +21,7 @@ func RefreshToken(c *gin.Context) {
 		return
 	}
 
-	tokens, err := utils.RefreshToken(req.RefreshToken)
+	tokens, err := systemService.RefreshLogin(req.RefreshToken, c.ClientIP(), c.Request.UserAgent())
 	if err != nil {
 		response.FailWithHTTP(c, http.StatusUnauthorized, code.LoginRequired)
 		return
@@ -40,6 +41,11 @@ func Logout(c *gin.Context) {
 
 	var req systemRequest.LogoutRequest
 	_ = c.ShouldBindJSON(&req)
+
+	// 登出时同步清掉在线会话记录，避免在线用户列表出现"幽灵"会话。
+	if claims, err := utils.ParseToken(accessToken); err == nil {
+		systemService.RemoveOnlineSession(claims.JTI)
+	}
 
 	if err := utils.RevokeToken(accessToken); err != nil {
 		response.FailWithHTTP(c, http.StatusUnauthorized, code.LoginRequired)

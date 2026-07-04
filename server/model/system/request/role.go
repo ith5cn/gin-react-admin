@@ -10,4 +10,6 @@ type RolePayload struct {
 	Status    *int16  `json:"status"`
 	Sort      *uint16 `json:"sort"`
 	Remark    *string `json:"remark"`
+	// DeptIDs 只在 dataScope=2（自定义数据权限）时有意义：nil 表示不改动，空数组表示清空授权。
+	DeptIDs *[]uint `json:"deptIds"`
 }

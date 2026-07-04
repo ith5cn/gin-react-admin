@@ -14,8 +14,14 @@ import (
 // UserList 分页查询用户列表。
 // 查询条件分两类：likes（模糊匹配，生成 LIKE '%xx%'）和 equals（精确匹配）；
 // map 的 key 是前端参数名（camelCase），value 是数据库列名（snake_case）。
-func UserList(query map[string]string) (*commonResponse.PageResult, error) {
+// operatorID 是当前操作者，用于套数据权限（dataScope）：非全部权限的角色只能看到授权部门内的用户。
+func UserList(operatorID uint, query map[string]string) (*commonResponse.PageResult, error) {
 	db, err := systemDB()
+	if err != nil {
+		return nil, err
+	}
+
+	scope, err := UserDataScope(operatorID)
 	if err != nil {
 		return nil, err
 	}
@@ -23,6 +29,7 @@ func UserList(query map[string]string) (*commonResponse.PageResult, error) {
 	page := parsePage(query)
 	// softDelete 统一追加 delete_time IS NULL，过滤掉已软删除的数据。
 	base := softDelete(db.Model(&systemModel.AISystemUser{}))
+	base = applyUserDataScope(base, scope, operatorID)
 	base = applyFilters(base, query,
 		map[string]string{"username": "username", "nickname": "nickname", "phone": "phone", "email": "email"},
 		map[string]string{"status": "status", "deptId": "dept_id"},

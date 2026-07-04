@@ -4,6 +4,7 @@ import (
 	"server/config"
 	"server/router"
 	installService "server/service/install"
+	systemService "server/service/system"
 	gormInit "server/setup/gorm"
 	loggerInit "server/setup/logger"
 	redisInit "server/setup/redis"
@@ -51,5 +52,10 @@ func initSetup() error {
 		return err
 	}
 
-	return redisInit.Redis.Initialize()
+	if err := redisInit.Redis.Initialize(); err != nil {
+		return err
+	}
+
+	// 定时任务调度器依赖数据库（读任务配置），必须在 gorm 初始化之后启动。
+	return systemService.StartCrontabScheduler()
 }

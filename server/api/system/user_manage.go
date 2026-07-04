@@ -8,9 +8,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// UserList 用户分页列表。
+// UserList 用户分页列表，按当前操作者的数据权限过滤可见范围。
 func UserList(c *gin.Context) {
-	data, err := systemService.UserList(queryMap(c))
+	operatorID, ok := currentUserID(c)
+	if !ok {
+		return
+	}
+	data, err := systemService.UserList(operatorID, queryMap(c))
 	successOrFail(c, data, err)
 }
 

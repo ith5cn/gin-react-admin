@@ -20,7 +20,8 @@
 11. [错误处理体系](#11-错误处理体系)
 12. [统一响应格式](#12-统一响应格式)
 13. [Go 泛型在本项目中的应用](#13-go-泛型在本项目中的应用)
-14. [RBAC 权限模型与动态菜单](#14-rbac-权限模型与动态菜单)
+14. [RBAC 权限模型与动态菜单](#14-rbac-权限模型与动态菜单)（含数据权限 dataScope、在线用户）
+    - 14.5 [定时任务调度器（robfig/cron）](#145-定时任务调度器robfigcron)
 15. [代码生成器的原理](#15-代码生成器的原理)
 16. [本项目真实踩过的坑（重构实录）](#16-本项目真实踩过的坑重构实录)
 17. [测试](#17-测试)
@@ -574,6 +575,48 @@ func CreatePost(...) (*AISystemPost, error) {
 > **面试常问**
 > - "RBAC 是什么？表怎么设计？"
 > - "树形结构在数据库里怎么存？"（邻接表 parent_id / 路径枚举 level / 闭包表，各自权衡）
+
+**数据权限（dataScope）——控制"能看到哪些行"**：接口权限回答"你能不能调这个接口"，数据权限回答"调了之后你能看到哪些数据"。两者互补，都在服务端强制。角色表的 `data_scope` 字段取值：
+
+| 值 | 含义 | 过滤方式 |
+|---|---|---|
+| 1 | 全部数据 | 不加条件（历史数据 NULL 也按此处理，升级不缩小可见范围） |
+| 2 | 自定义 | 按 `ai_system_role_dept` 关联表授权的部门过滤 |
+| 3 | 本部门 | `dept_id = 我的部门` |
+| 4 | 本部门及以下 | 部门树在内存里展开后代，`dept_id IN (...)` |
+| 5 | 仅本人 | `id = 我自己` |
+
+实现在 `service/system/datascope.go`：`UserDataScope` 算出操作者的可见范围（多角色取**并集**，最宽松的生效；任何一个角色是"全部"就直接放行），`applyUserDataScope` 把范围拼成 GORM 条件注入查询。目前套在用户列表（`UserList`）上，其他列表要接入时复用这两个函数即可。注意 handler 传的是 **JWT 里的当前用户 ID**，绝不信前端传参——和个人中心同一条纪律。
+
+> **面试常问**："功能权限和数据权限的区别？"（功能权限=接口能不能调，数据权限=行级可见性；RuoYi 等后台框架的 dataScope 就是行级过滤的角色化配置）
+
+**在线用户管理——Redis 会话的又一次复用**：登录/刷新 token 成功后按 access token 的 jti 写一条 `online:token:<jti>` 记录（JSON：用户、IP、浏览器、登录时间），TTL 与 access token 相同——**token 过期记录自动消失，不需要清理任务**。列表用 `SCAN` 遍历（不用 `KEYS`，它会阻塞 Redis）；踢下线=删掉该会话的 access/refresh jti，被踢的 token 下一次请求就过不了 `ValidateToken`。这是"Redis 存 jti"设计的直接红利：状态本来就在服务端，才有"踢人"的抓手。
+
+---
+
+## 14.5 定时任务调度器（robfig/cron）
+
+`service/system/crontab_scheduler.go`，用社区标准库 `robfig/cron/v3`：
+
+```
+main.go 启动时 StartCrontabScheduler()
+  → 读 ai_tool_crontab 里 status=1 的任务
+  → 每条任务按 cron 表达式注册进调度器
+任务增删改 → ReloadCrontabScheduler() 全量重载
+```
+
+**要点与坑**：
+
+- **表达式解析器**：`cron.SecondOptional` 让 5 段（标准 `分 时 日 月 周`）和 6 段（带秒）都能解析——老数据是 6 段格式。创建/更新时先 `Parse` 校验，非法表达式返回业务错误而不是等运行时爆炸。
+- **全量重载而非增量维护**：任务量小（几十个以内），重载简单且不会出"改了没生效"的状态不一致；量大了再优化。
+- **闭包捕获循环变量**：`for _, task := range tasks` 里直接把 `task` 塞进闭包，所有任务都会执行最后一个——必须先 `taskCopy := task` 复制（Go 1.22 后 for 循环变量语义已修复，但显式复制意图更清晰）。
+- **单个任务不能拖垮进程**：执行函数里 `defer recover()`，HTTP 任务设超时（15s），任何 panic/失败只写执行日志。
+- **两种执行方式**：`task_style=2` 是 HTTP 任务（有参数 POST JSON，无参数 GET）；`task_style=1` 是内部任务，`target` 填注册名，从 `crontabTaskRegistry` 查函数执行。新增内部任务用 `RegisterCrontabTask` 注册，内置了 `system/clean-logs`（清理 N 天前的登录/操作日志）。
+- **singleton=1 的任务**调度触发一次后自动置停用并移出调度器（手动"执行一次"不算）。
+
+> **面试常问**
+> - "定时任务怎么防止单点/重复执行？"（本项目单实例进程内调度即可；多实例部署需要分布式锁（Redis SETNX）或专门的调度中心（xxl-job 等），说清楚量级和取舍）
+> - "cron 表达式 6 段和 5 段的区别？"（多出来的第一段是秒；Java Quartz 惯用 6 段，Unix crontab 是 5 段）
 
 ---
 

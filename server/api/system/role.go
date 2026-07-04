@@ -47,6 +47,12 @@ func BindRoleMenu(c *gin.Context) {
 	successOrFail(c, true, systemService.BindRoleMenus(c.Param("id"), payload.IDs))
 }
 
+// RoleDeptIDs 查询角色已授权的部门 ID（自定义数据权限回显）。
+func RoleDeptIDs(c *gin.Context) {
+	result, err := systemService.RoleDeptIDsByRoleID(c.Param("id"))
+	successOrFail(c, result, err)
+}
+
 // RoleAccess 角色下拉数据。
 func RoleAccess(c *gin.Context) {
 	result, err := systemService.RoleAccess()

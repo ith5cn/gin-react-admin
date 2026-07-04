@@ -440,11 +440,14 @@ INSERT INTO `ai_system_menu` VALUES (3600, 3000, '0,3000', '邮件记录', 'moni
 INSERT INTO `ai_system_menu` VALUES (3601, 3600, '0,3000,3600', '邮件记录删除', 'system/email/destroy', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (3602, 3600, '0,3000,3600', '邮件记录列表', 'system/email/index', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (3700, 3200, '0,3000,3200', '服务监控列表', 'system/monitor/index', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (3100, 3000, '0,3000', '在线用户', 'monitor/online', 'TeamOutlined', 'monitor/online', 'system/monitor/online', NULL, 2, 1, 'M', 0, NULL, 1, 30, '', 1, 1, '2026-07-04 00:00:00', '2026-07-04 00:00:00', NULL);
+INSERT INTO `ai_system_menu` VALUES (3101, 3100, '0,3000,3100', '在线用户列表', 'system/online/index', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2026-07-04 00:00:00', '2026-07-04 00:00:00', NULL);
+INSERT INTO `ai_system_menu` VALUES (3102, 3100, '0,3000,3100', '在线用户强退', 'system/online/kick', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2026-07-04 00:00:00', '2026-07-04 00:00:00', NULL);
 INSERT INTO `ai_system_menu` VALUES (4000, 0, '0', '工具', 'tool', 'IconTool', 'tool', '', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (4100, 4000, '0,4000', '代码生成器', 'tool/code', 'IconCodeSquare', 'tool/code', 'system/gen-code/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-06-18 18:27:10', NULL);
 INSERT INTO `ai_system_menu` VALUES (4101, 4100, '0,4000,4100', '代码生成列表', 'system/codegen/index', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (4102, 4100, '0,4000,4100', '功能操作', 'system/codegen/access', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (4200, 4000, '0,4000', '定时任务', 'tool/crontab', 'IconSchedule', 'tool/crontab', 'tool/crontab/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (4200, 4000, '0,4000', '定时任务', 'tool/crontab', 'IconSchedule', 'tool/crontab', 'system/tool/crontab/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (4201, 4200, '0,4000,4200', '定时任务列表', 'system/crontab/index', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (4202, 4200, '0,4000,4200', '定时任务保存', 'system/crontab/create', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (4203, 4200, '0,4000,4200', '定时任务更新', 'system/crontab/update', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
@@ -545,6 +548,22 @@ CREATE TABLE `ai_system_role_menu`  (
 
 -- ----------------------------
 -- Records of ai_system_role_menu
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for ai_system_role_dept
+-- ----------------------------
+DROP TABLE IF EXISTS `ai_system_role_dept`;
+CREATE TABLE `ai_system_role_dept`  (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `role_id` int UNSIGNED NOT NULL COMMENT '角色ID',
+  `dept_id` int UNSIGNED NOT NULL COMMENT '部门ID',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_role_id`(`role_id` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '角色部门关联表(自定义数据权限)' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of ai_system_role_dept
 -- ----------------------------
 
 -- ----------------------------

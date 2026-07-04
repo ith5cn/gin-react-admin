@@ -7,7 +7,7 @@ import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 
 
 export interface CrontabLogRef {
-    open: (data: Record<string, any>) => void;
+    open: (data: { id: number | string }) => void;
 }
 
 // forwardRef 渲染函数的参数顺序是 (props, ref)，ref 是第二个参数
@@ -21,8 +21,8 @@ const CrontabLog = forwardRef<CrontabLogRef>((_, ref) => {
     // 打开弹框
     // 注意：不要在这里手动调用 refresh()
     // 使用 extraSearchParams 后，Ith5Table 内部会监听它的变化并自动刷新
-    const open = (data: Record<string, any>) => {
-        setSearchForm({ crontabId: data.id });
+    const open = (data: { id: number | string }) => {
+        setSearchForm({ crontabId: String(data.id) });
         setVisible(true);
     };
 
@@ -64,10 +64,10 @@ const CrontabLog = forwardRef<CrontabLogRef>((_, ref) => {
                 columns={[
                     {
                         title: '执行时间',
-                        dataIndex: 'startTime',
-                        key: 'startTime',
+                        dataIndex: 'createTime',
+                        key: 'createTime',
                         render: (text: string) => {
-                            return dayjs(text).format('YYYY-MM-DD HH:mm:ss');
+                            return text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-';
                         }
                     },
                     {
