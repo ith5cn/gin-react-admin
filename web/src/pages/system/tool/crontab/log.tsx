@@ -2,7 +2,7 @@ import { crontabLogListApi } from "@/api/system/crontab";
 import Ith5Table, { type TableRef } from "@/components/ith5ui/ith5-table";
 import { PlayCircleOutlined } from "@ant-design/icons";
 import { Button, Drawer, Modal } from "antd";
-import moment from "moment";
+import dayjs from "dayjs";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 
 
@@ -67,7 +67,7 @@ const CrontabLog = forwardRef<CrontabLogRef>((_, ref) => {
                         dataIndex: 'startTime',
                         key: 'startTime',
                         render: (text: string) => {
-                            return moment(text).format('YYYY-MM-DD HH:mm:ss');
+                            return dayjs(text).format('YYYY-MM-DD HH:mm:ss');
                         }
                     },
                     {

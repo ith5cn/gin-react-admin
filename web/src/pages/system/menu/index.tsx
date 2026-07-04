@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import MenuEdit, { type MenuEditRef } from "./edit";
 import { PlusOutlined } from "@ant-design/icons";
 import { resolveMenuIcon as renderIcon } from "@/routers/transformRoutes";
-import moment from "moment";
+import dayjs from "dayjs";
 
 const index = () => {
 
@@ -92,7 +92,7 @@ const index = () => {
                     { title: '排序', dataIndex: 'sort' },
                     { title: '隐藏', dataIndex: 'isHidden', render: (val: number) => val === 1 ? '是' : '否' },
                     { title: '状态', dataIndex: 'status', type: 'dict', dict: 'status' },
-                    { title: '创建时间', dataIndex: 'createTime', render: (text: string) => text ? moment(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
+                    { title: '创建时间', dataIndex: 'createTime', render: (text: string) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
                 ] as ColumnDef[]} />
 
             <MenuEdit ref={menuEditRef} onSuccess={() => {

@@ -1,8 +1,8 @@
 ﻿import { getDatasourcesApi, getDbTablesBySourceApi, importTablesApi } from "@/api/system/gencode";
 import Ith5Table, { type TableRef } from "@/components/ith5ui/ith5-table";
 import { Col, Form, Input, message, Modal, Select } from "antd";
-import moment from "moment";
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import dayjs from "dayjs";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 
 export interface CodeImportModalRef {
   open: () => void;
@@ -12,20 +12,24 @@ interface CodeImportModalProps {
   onSuccess?: () => void;
 }
 
+type DatasourceOption = { label: string; value: string; databaseName?: string };
+
+type DbTableRow = { TABLE_NAME: string; TABLE_COMMENT?: string };
+
 const CodeImportModal = forwardRef<CodeImportModalRef, CodeImportModalProps>(({ onSuccess }, ref) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [datasourceData, setDatasourceData] = useState<any[]>([]);
+  const [datasourceData, setDatasourceData] = useState<DatasourceOption[]>([]);
   const tableRef = useRef<TableRef>(null);
   const [searchForm, setSearchForm] = useState({ source: "ai_system" });
 
   const handleOk = async () => {
-    const selectedRows = tableRef.current?.getSelectedRows() ?? [];
+    const selectedRows = (tableRef.current?.getSelectedRows() ?? []) as DbTableRow[];
     if (selectedRows.length === 0) {
       message.warning("请选择要导入的数据表");
       return;
     }
 
-    const tables = selectedRows.map((item: any) => ({
+    const tables = selectedRows.map((item) => ({
       tableName: item.TABLE_NAME,
       tableComment: item.TABLE_COMMENT,
     }));
@@ -49,13 +53,10 @@ const CodeImportModal = forwardRef<CodeImportModalRef, CodeImportModalProps>(({ 
   const open = async () => {
     setIsModalOpen(true);
     tableRef.current?.clearSelection();
+    await getDatasources();
   };
 
   useImperativeHandle(ref, () => ({ open }));
-
-  useEffect(() => {
-    getDatasources();
-  }, []);
 
   return (
     <Modal
@@ -100,7 +101,7 @@ const CodeImportModal = forwardRef<CodeImportModalRef, CodeImportModalProps>(({ 
             title: "创建时间",
             dataIndex: "CREATE_TIME",
             key: "CREATE_TIME",
-            render: (text: string) => (text ? moment(text).format("YYYY-MM-DD HH:mm:ss") : "-"),
+            render: (text: string) => (text ? dayjs(text).format("YYYY-MM-DD HH:mm:ss") : "-"),
           },
         ]}
       />

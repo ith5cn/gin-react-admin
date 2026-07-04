@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Col, Form, Input, message } from "antd";
-import moment from "moment";
+import dayjs from "dayjs";
 import Ith5Table, { type ColumnDef, type TableRef } from "@/components/ith5ui/ith5-table";
 import { operLogDeleteApi, operLogListApi } from "@/api/system/oper-log";
 import OperLogEdit, { type OperLogEditRef } from "./edit";
@@ -71,7 +71,7 @@ const OperLogIndex = () => {
           { title: "操作IP", dataIndex: "ip", width: 160 },
           { title: "操作地点", dataIndex: "ipLocation", width: 160 },
           { title: "操作时间", dataIndex: "createTime", width: 160 },
-          { title: "创建时间", dataIndex: "createTime", width: 180, render: (text: string) => text ? moment(text).format("YYYY-MM-DD HH:mm:ss") : "-" }
+          { title: "创建时间", dataIndex: "createTime", width: 180, render: (text: string) => text ? dayjs(text).format("YYYY-MM-DD HH:mm:ss") : "-" }
         ] as ColumnDef[]}
       />
       <OperLogEdit ref={editRef} onSuccess={() => tableRef.current?.refresh()} />

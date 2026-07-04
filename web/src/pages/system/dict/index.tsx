@@ -3,7 +3,7 @@ import Ith5Table, { type ColumnDef } from "@/components/ith5ui/ith5-table";
 import Ith5Select from "@/components/ith5ui/ith5-select";
 import { dictTypeListApi, dictTypeDeleteApi, dictTypeUpdateApi } from "@/api/system/dict";
 import { Col, Form, Input, Switch, message, Button } from "antd";
-import moment from "moment";
+import dayjs from "dayjs";
 import Edit, { type EditRef } from "./edit";
 import DictDataIndex from "./data-index";
 import { UnorderedListOutlined } from "@ant-design/icons";
@@ -111,7 +111,7 @@ const DictTypeIndex = () => {
                         { title: '字典名称', dataIndex: 'name' },
                         { title: '字典标示', dataIndex: 'code' },
                         { title: '状态', dataIndex: 'status', render: (_: any, record: any) => <StatusSwitch record={record} /> },
-                        { title: '创建时间', dataIndex: 'createTime', render: (text: any) => text ? moment(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
+                        { title: '创建时间', dataIndex: 'createTime', render: (text: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
                     ] as ColumnDef[]}
                     operationBeforeExtend={(record) => {
                         return (

@@ -1,6 +1,6 @@
 import { DeleteOutlined, EyeOutlined, FolderOpenOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Col, DatePicker, Form, Image, Input, List, Modal, Select, Tag, message } from "antd";
-import moment from "moment";
+import dayjs from "dayjs";
 import { useMemo, useRef, useState } from "react";
 import Ith5Table, { type ColumnDef, type TableRef } from "@/components/ith5ui/ith5-table";
 import FilePreview from "@/components/file-preview";
@@ -139,8 +139,8 @@ const AttachmentIndex = () => {
   const listApi = async (params: any) => {
     const nextParams = { ...params };
     if (Array.isArray(nextParams.dateRange) && nextParams.dateRange.length === 2) {
-      nextParams.startDate = moment(nextParams.dateRange[0]).format("YYYY-MM-DD");
-      nextParams.endDate = moment(nextParams.dateRange[1]).format("YYYY-MM-DD");
+      nextParams.startDate = dayjs(nextParams.dateRange[0]).format("YYYY-MM-DD");
+      nextParams.endDate = dayjs(nextParams.dateRange[1]).format("YYYY-MM-DD");
     }
     delete nextParams.dateRange;
     return attachmentListApi(nextParams);
@@ -265,7 +265,7 @@ const AttachmentIndex = () => {
                 title: "上传时间",
                 dataIndex: "createTime",
                 width: 180,
-                render: (value: string) => (value ? moment(value).format("YYYY-MM-DD HH:mm:ss") : "-"),
+                render: (value: string) => (value ? dayjs(value).format("YYYY-MM-DD HH:mm:ss") : "-"),
               },
             ] as ColumnDef[]}
           />

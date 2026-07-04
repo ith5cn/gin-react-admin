@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Col, Form, Input, message } from "antd";
-import moment from "moment";
+import dayjs from "dayjs";
 import Ith5Table, { type ColumnDef, type TableRef } from "@/components/ith5ui/ith5-table";
 import Ith5Select from "@/components/ith5ui/ith5-select";
 import { loginLogDeleteApi, loginLogListApi } from "@/api/system/login-log";
@@ -68,7 +68,7 @@ const NestSystemLoginLogIndex = () => {
           { title: "操作系统", dataIndex: "os", width: 160 },
           { title: "浏览器", dataIndex: "browser", width: 160 },
           { title: "登录时间", dataIndex: "loginTime", width: 160 },
-          { title: "创建时间", dataIndex: "createTime", width: 180, render: (text: string) => text ? moment(text).format("YYYY-MM-DD HH:mm:ss") : "-" }
+          { title: "创建时间", dataIndex: "createTime", width: 180, render: (text: string) => text ? dayjs(text).format("YYYY-MM-DD HH:mm:ss") : "-" }
         ] as ColumnDef[]}
       />
       <NestSystemLoginLogEdit ref={editRef} onSuccess={() => tableRef.current?.refresh()} />

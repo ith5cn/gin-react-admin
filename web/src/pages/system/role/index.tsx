@@ -4,7 +4,7 @@ import Ith5Table, { type TableRef, type ColumnDef } from "@/components/ith5ui/it
 import Ith5Select from "@/components/ith5ui/ith5-select";
 import { roleDeleteApi, roleListApi } from "@/api/system/role";
 import { message } from "antd";
-import moment from "moment";
+import dayjs from "dayjs";
 import RoleEdit, { type RoleEditRef } from "./edit";
 import MenuPermission, { type MenuPermissionRef } from "./menu-permission";
 import { PlusOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
@@ -99,7 +99,7 @@ const RoleIndex = () => {
                     { title: '排序', dataIndex: 'sort', width: 80 },
                     { title: '数据范围', dataIndex: 'dataScope', width: 120, render: (val: number) => dataScopeMap[val] || '-' },
                     { title: '状态', dataIndex: 'status', width: 100, type: 'dict', dict: 'status' },
-                    { title: '创建时间', dataIndex: 'createTime', width: 180, render: (text: string) => text ? moment(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
+                    { title: '创建时间', dataIndex: 'createTime', width: 180, render: (text: string) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
                 ] as ColumnDef[]}
             />
             <RoleEdit

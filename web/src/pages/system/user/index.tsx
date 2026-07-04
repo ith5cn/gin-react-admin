@@ -4,7 +4,7 @@ import Ith5AccessDept from "@/components/ith5ui/ith5-access-dept";
 import Ith5Table, { type ColumnDef } from "@/components/ith5ui/ith5-table";
 import { userDeleteApi, userListApi, userUpdateApi, userRefreshCacheApi } from "@/api/system/user";
 import { Button, Col, Dropdown, Form, Input, Space, Switch, message } from "antd";
-import moment from "moment";
+import dayjs from "dayjs";
 import Edit, { type EditRef } from "./edit";
 import type { TableRef } from "@/components/ith5ui/ith5-table";
 import { EllipsisOutlined, ReloadOutlined } from "@ant-design/icons";
@@ -128,7 +128,7 @@ const UserIndex = () => {
                         { title: '手机', dataIndex: 'phone' },
                         { title: '邮箱', dataIndex: 'email' },
                         { title: '状态', dataIndex: 'status', render: (_: any, record: any) => <StatusSwitch record={record} /> },
-                        { title: '创建时间', dataIndex: 'createTime', render: (text: any) => text ? moment(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
+                        { title: '创建时间', dataIndex: 'createTime', render: (text: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
                     ] as ColumnDef[]}
                     operationCell={(record) => {
                         // 只有 id 为 1 时展示更新缓存，其余可能返回默认或空

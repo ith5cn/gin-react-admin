@@ -32,9 +32,22 @@ export interface GencodeColumnRecord {
   remark?: string;
 }
 
+export type GencodeTableRecord = {
+  id: number;
+  table_name?: string;
+  table_comment?: string;
+};
+
+export type MenuTreeNode = {
+  id: number;
+  name?: string;
+  type?: string;
+  children?: MenuTreeNode[];
+};
+
 export interface GencodeModalRef {
-  open: (data: any) => void;
-  preview: (data: any) => void;
+  open: (data: GencodeTableRecord) => void;
+  preview: (data: GencodeTableRecord) => void;
 }
 
 interface GencodeModalProps {
@@ -63,7 +76,7 @@ const renderPreviewCode = (content: string) => (
   </pre>
 );
 
-const filterMenuTree = (nodes: any[]): any[] => {
+const filterMenuTree = (nodes: MenuTreeNode[]): MenuTreeNode[] => {
   return nodes
     .map((node) => ({
       ...node,
@@ -78,7 +91,7 @@ const GencodeModal = forwardRef<GencodeModalRef, GencodeModalProps>(({ onSuccess
   const [loading, setLoading] = useState(false);
   const [currentId, setCurrentId] = useState<number | null>(null);
   const [columns, setColumns] = useState<GencodeColumnRecord[]>([]);
-  const [menuTree, setMenuTree] = useState<any[]>([]);
+  const [menuTree, setMenuTree] = useState<MenuTreeNode[]>([]);
   const [dictTypeOptions, setDictTypeOptions] = useState<Array<{ label: string; value: string }>>([]);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewFiles, setPreviewFiles] = useState<PreviewFileRecord[]>([]);
@@ -92,14 +105,14 @@ const GencodeModal = forwardRef<GencodeModalRef, GencodeModalProps>(({ onSuccess
     ]);
 
     const detail = detailRes.data;
-    const menus = menuRes.data?.list || menuRes.data?.data || menuRes.data || [];
-    const dictRows = dictRes.data?.list || dictRes.data?.data || [];
+    const menus = (menuRes.data?.list || menuRes.data?.data || menuRes.data || []) as MenuTreeNode[];
+    const dictRows = (dictRes.data?.list || dictRes.data?.data || []) as Array<{ name: string; code: string }>;
 
     setTitle(detail.table.table_comment || detail.table.table_name || "");
     setColumns(detail.columns || []);
     setMenuTree(filterMenuTree(menus));
     setDictTypeOptions(
-      dictRows.map((item: any) => ({
+      dictRows.map((item) => ({
         label: item.name,
         value: item.code,
       })),
@@ -108,14 +121,14 @@ const GencodeModal = forwardRef<GencodeModalRef, GencodeModalProps>(({ onSuccess
     form.setFieldsValue({ ...detail.table });
   };
 
-  const open = async (data: any) => {
+  const open = async (data: GencodeTableRecord) => {
     setCurrentId(Number(data.id));
     setPreviewVisible(false);
     setIsModalOpen(true);
     await loadDetail(Number(data.id));
   };
 
-  const preview = async (data: any) => {
+  const preview = async (data: GencodeTableRecord) => {
     setCurrentId(Number(data.id));
     setTitle(data.table_comment || data.table_name || "");
     setPreviewFiles([]);

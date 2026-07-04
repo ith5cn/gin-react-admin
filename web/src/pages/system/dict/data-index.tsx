@@ -3,7 +3,7 @@ import Ith5Table, { type ColumnDef } from "@/components/ith5ui/ith5-table";
 import { dictDataListApi, dictDataDeleteApi, dictDataUpdateApi } from "@/api/system/dict";
 import { Col, Form, Input, Switch, message, Modal, Tag } from "antd";
 import Ith5Select from "@/components/ith5ui/ith5-select";
-import moment from "moment";
+import dayjs from "dayjs";
 import DataEdit, { type DataEditRef } from "./data-edit";
 
 // 状态切换开关组件
@@ -115,7 +115,7 @@ const DictDataIndex: React.FC<DictDataIndexProps> = ({ dictType, onClose }) => {
                         { title: '颜色', dataIndex: 'color', render: (text: any) => text ? <span style={{ color: text }}>{text}</span> : '-' },
                         { title: '排序', dataIndex: 'sort' },
                         { title: '状态', dataIndex: 'status', render: (_: any, record: any) => <StatusSwitch record={record} /> },
-                        { title: '创建时间', dataIndex: 'createTime', render: (text: any) => text ? moment(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
+                        { title: '创建时间', dataIndex: 'createTime', render: (text: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
                     ] as ColumnDef[]}
                 />
             </div>

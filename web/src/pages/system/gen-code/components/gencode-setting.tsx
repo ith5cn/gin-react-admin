@@ -1,9 +1,10 @@
 ﻿import type { FormInstance } from "antd";
 import { Alert, Col, Divider, Form, Input, InputNumber, Radio, Row, TreeSelect } from "antd";
+import type { MenuTreeNode } from "./gen-code-modal";
 
 interface GencodeSettingProps {
   form: FormInstance;
-  menuTree: any[];
+  menuTree: MenuTreeNode[];
 }
 
 const GencodeSetting = ({ form, menuTree }: GencodeSettingProps) => {

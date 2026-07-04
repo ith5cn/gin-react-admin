@@ -47,6 +47,109 @@ func DeleteRecord(model interface{}, id string) error {
 	return deleteByID(model, id)
 }
 
+// QueryFilter 描述一个查询条件：Param 是前端参数名，Column 是数据库列名，
+// Op 是操作符（eq/neq/gt/gte/lt/lte/like/in/notin/between）。
+type QueryFilter struct {
+	Param  string
+	Column string
+	Op     string
+}
+
+// PageListFiltered 是 codegen 生成代码的分页查询契约（PageList 的增强版）：
+// 支持全量查询操作符、orderBy/orderType 排序白名单和软删除开关。
+func PageListFiltered(query map[string]string, model interface{}, dest interface{}, filters []QueryFilter, sortable map[string]string, defaultOrder string, useSoftDelete bool) (*commonResponse.PageResult, error) {
+	db, err := systemDB()
+	if err != nil {
+		return nil, err
+	}
+	page := parsePage(query)
+	base := db.Model(model)
+	if useSoftDelete {
+		base = softDelete(base)
+	}
+	base = applyQueryFilters(base, query, filters)
+	var total int64
+	if err := base.Count(&total).Error; err != nil {
+		return nil, err
+	}
+	order := resolveOrder(query, sortable, defaultOrder)
+	if err := base.Order(order).Offset((page.Page - 1) * page.Size).Limit(page.Size).Find(dest).Error; err != nil {
+		return nil, err
+	}
+	return &commonResponse.PageResult{List: dest, Total: total}, nil
+}
+
+// SoftDeleteRecord 通过 UPDATE delete_time 实现软删除，供 codegen 生成的软删模型使用。
+func SoftDeleteRecord(table string, id string) error {
+	db, err := systemDB()
+	if err != nil {
+		return err
+	}
+	return db.Table(table).Where("id = ?", id).
+		Updates(map[string]interface{}{"delete_time": gorm.Expr("NOW()"), "update_time": gorm.Expr("NOW()")}).Error
+}
+
+func applyQueryFilters(db *gorm.DB, query map[string]string, filters []QueryFilter) *gorm.DB {
+	for _, filter := range filters {
+		value := query[filter.Param]
+		if value == "" {
+			continue
+		}
+		column := filter.Column
+		switch filter.Op {
+		case "neq":
+			db = db.Where(column+" <> ?", value)
+		case "gt":
+			db = db.Where(column+" > ?", value)
+		case "gte":
+			db = db.Where(column+" >= ?", value)
+		case "lt":
+			db = db.Where(column+" < ?", value)
+		case "lte":
+			db = db.Where(column+" <= ?", value)
+		case "like":
+			db = db.Where(column+" LIKE ?", "%"+value+"%")
+		case "in":
+			db = db.Where(column+" IN ?", splitQueryValues(value))
+		case "notin":
+			db = db.Where(column+" NOT IN ?", splitQueryValues(value))
+		case "between":
+			parts := splitQueryValues(value)
+			if len(parts) >= 2 {
+				db = db.Where(column+" BETWEEN ? AND ?", parts[0], parts[1])
+			}
+		default:
+			db = db.Where(column+" = ?", value)
+		}
+	}
+	return db
+}
+
+// resolveOrder 只接受排序白名单里的列，避免 orderBy 参数注入任意 SQL。
+func resolveOrder(query map[string]string, sortable map[string]string, defaultOrder string) string {
+	column, ok := sortable[query["orderBy"]]
+	if !ok || column == "" {
+		return defaultOrder
+	}
+	direction := "ASC"
+	if strings.EqualFold(query["orderType"], "desc") {
+		direction = "DESC"
+	}
+	return column + " " + direction
+}
+
+func splitQueryValues(value string) []string {
+	parts := strings.Split(value, ",")
+	result := make([]string, 0, len(parts))
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part != "" {
+			result = append(result, part)
+		}
+	}
+	return result
+}
+
 func passthroughColumns(data map[string]interface{}) map[string]string {
 	columns := make(map[string]string, len(data))
 	for key := range data {

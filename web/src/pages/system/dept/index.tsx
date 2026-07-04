@@ -7,7 +7,7 @@ import Ith5Table, {
 } from "@/components/ith5ui/ith5-table";
 import { deptDeleteApi, deptListApi } from "@/api/system/dept";
 import { message } from "antd";
-import moment from "moment";
+import dayjs from "dayjs";
 import DeptEdit, { type DeptEditRef } from "./edit";
 import { PlusOutlined } from "@ant-design/icons";
 import { Button } from "antd";
@@ -73,7 +73,7 @@ const DeptIndex = () => {
               dataIndex: "createTime",
               width: 180,
               render: (text: string) =>
-                text ? moment(text).format("YYYY-MM-DD HH:mm:ss") : "-",
+                text ? dayjs(text).format("YYYY-MM-DD HH:mm:ss") : "-",
             },
           ] as ColumnDef[]
         }
