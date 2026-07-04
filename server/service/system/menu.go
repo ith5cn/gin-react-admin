@@ -5,6 +5,7 @@ import (
 	systemRequest "server/model/system/request"
 )
 
+// MenuList 查询菜单并组装成树形结构返回（菜单管理页面用，不分页）。
 func MenuList(query map[string]string) (map[string]interface{}, error) {
 	db, err := systemDB()
 	if err != nil {
@@ -19,14 +20,17 @@ func MenuList(query map[string]string) (map[string]interface{}, error) {
 	return map[string]interface{}{"data": BuildMenuTree(menus)}, nil
 }
 
+// CreateMenu 新增菜单。createWithLevel 会根据 parent_id 自动维护 level 层级路径。
 func CreateMenu(payload systemRequest.MenuPayload) (*systemModel.AISystemMenu, error) {
 	return createWithLevel[systemModel.AISystemMenu]("ai_system_menu", menuPayloadData(payload))
 }
 
+// UpdateMenu 更新菜单，父级变化时同步重算 level。
 func UpdateMenu(id string, payload systemRequest.MenuPayload) (*systemModel.AISystemMenu, error) {
 	return updateWithLevel[systemModel.AISystemMenu]("ai_system_menu", id, menuPayloadData(payload))
 }
 
+// DeleteMenu 删除菜单；存在子菜单时拒绝删除，防止树上出现"孤儿节点"。
 func DeleteMenu(id string) error {
 	has, err := hasChildren("ai_system_menu", id)
 	if err != nil {
@@ -38,6 +42,9 @@ func DeleteMenu(id string) error {
 	return deleteByID(&systemModel.AISystemMenu{}, id)
 }
 
+// AccessMenu 返回指定用户有权访问的菜单树（RBAC 核心查询）：
+// 用户 → user_role 中间表 → 角色 → role_menu 中间表 → 菜单。
+// 超级管理员跳过角色过滤，直接返回全部启用菜单。
 func AccessMenu(userID uint) ([]*systemModel.AISystemMenu, error) {
 	db, err := systemDB()
 	if err != nil {
@@ -75,6 +82,7 @@ func AccessMenu(userID uint) ([]*systemModel.AISystemMenu, error) {
 	return BuildMenuTree(menus), nil
 }
 
+// MenuIDsByRoleID 查询角色已绑定的菜单 ID，用于权限弹窗回显勾选。
 func MenuIDsByRoleID(roleID string) ([]uint, error) {
 	db, err := systemDB()
 	if err != nil {
@@ -91,6 +99,9 @@ func MenuIDsByRoleID(roleID string) ([]uint, error) {
 	return ids, nil
 }
 
+// BuildMenuTree 把扁平的菜单列表组装成树。
+// 经典两步法：先把所有节点放进 map（父节点查找 O(1)），
+// 再遍历一次把每个节点挂到父节点下；找不到父节点的提升为根，数据异常时也不丢节点。
 func BuildMenuTree(menus []systemModel.AISystemMenu) []*systemModel.AISystemMenu {
 	nodeMap := make(map[uint]*systemModel.AISystemMenu, len(menus))
 	roots := make([]*systemModel.AISystemMenu, 0)
@@ -119,6 +130,7 @@ func BuildMenuTree(menus []systemModel.AISystemMenu) []*systemModel.AISystemMenu
 	return roots
 }
 
+// menuPayloadData 把类型化入参转成 GORM 更新 map，nil 字段跳过（部分更新语义）。
 func menuPayloadData(payload systemRequest.MenuPayload) map[string]interface{} {
 	data := map[string]interface{}{}
 	setColumn(data, "parent_id", payload.ParentID)

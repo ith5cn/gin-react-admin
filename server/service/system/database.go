@@ -44,6 +44,8 @@ type recycleRecord struct {
 
 var safeIdentifierPattern = regexp.MustCompile(`^[A-Za-z0-9_]+$`)
 
+// DatabaseTableList 从 information_schema 分页查询当前库的表信息
+// （行数、碎片、数据/索引大小等），供数据库维护页面展示。
 func DatabaseTableList(query map[string]string) (*commonResponse.PageResult, error) {
 	db, schema, err := databaseContext()
 	if err != nil {
@@ -85,6 +87,7 @@ WHERE table_schema = ? AND table_type = 'BASE TABLE'`
 	return &commonResponse.PageResult{List: rows, Total: total}, nil
 }
 
+// DatabaseTableColumns 查询指定表的字段结构。
 func DatabaseTableColumns(tableName string) ([]databaseColumnInfo, error) {
 	db, schema, err := databaseContext()
 	if err != nil {
@@ -110,14 +113,18 @@ ORDER BY ordinal_position ASC`, schema, tableName).Scan(&rows).Error
 	return rows, err
 }
 
+// DatabaseOptimizeTables 对选中的表执行 OPTIMIZE TABLE。
+// 表名无法参数化，必须先用白名单正则校验，防止 SQL 注入。
 func DatabaseOptimizeTables(payload systemRequest.DatabaseTablesPayload) (map[string]interface{}, error) {
 	return maintainTables(payload.Tables, "OPTIMIZE TABLE")
 }
 
+// DatabaseClearFragments 通过 OPTIMIZE TABLE 清理表碎片。
 func DatabaseClearFragments(payload systemRequest.DatabaseTablesPayload) (map[string]interface{}, error) {
 	return maintainTables(payload.Tables, "OPTIMIZE TABLE")
 }
 
+// DatabaseRecycleList 查询回收站：扫描带 delete_time 列的表里已软删除的行。
 func DatabaseRecycleList(query map[string]string) (*commonResponse.PageResult, error) {
 	db, schema, err := databaseContext()
 	if err != nil {
@@ -141,10 +148,12 @@ func DatabaseRecycleList(query map[string]string) (*commonResponse.PageResult, e
 	return &commonResponse.PageResult{List: rows, Total: total}, nil
 }
 
+// DatabaseRecycleRecover 恢复软删除数据（把 delete_time 置回 NULL）。
 func DatabaseRecycleRecover(payload systemRequest.DatabaseRecyclePayload) error {
 	return updateRecycleRows(payload, map[string]interface{}{"delete_time": nil})
 }
 
+// DatabaseRecycleDestroy 从回收站彻底删除数据（物理 DELETE，不可恢复）。
 func DatabaseRecycleDestroy(payload systemRequest.DatabaseRecyclePayload) error {
 	db, schema, err := databaseContext()
 	if err != nil {

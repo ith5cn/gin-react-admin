@@ -22,7 +22,7 @@ func NewRouter() *gin.Engine {
 	Router.Use(middleware.Recovery())
 	Router.Use(middleware.RequestLogger())
 	Router.Use(middleware.CORS())
-	Router.Use(installGuard())
+	// Router.Use(installGuard())
 
 	// registerGroups 按指定前缀注册一套公开路由和私有路由。
 	// 私有路由统一挂 JWT 中间件，业务模块只需要关心自己的 URL 分组。

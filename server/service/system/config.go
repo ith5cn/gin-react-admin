@@ -8,28 +8,35 @@ import (
 	"gorm.io/gorm"
 )
 
+// ConfigGroupList 分页查询配置分组。
 func ConfigGroupList(query map[string]string) (*commonResponse.PageResult, error) {
 	var data []systemModel.AISystemConfigGroup
 	return pageList(query, &systemModel.AISystemConfigGroup{}, &data, map[string]string{"name": "name", "code": "code"}, map[string]string{}, "sort ASC, id ASC")
 }
 
+// CreateConfigGroup 新增配置分组。
 func CreateConfigGroup(payload systemRequest.ConfigGroupPayload) (*systemModel.AISystemConfigGroup, error) {
 	return createRow[systemModel.AISystemConfigGroup]("ai_system_config_group", configGroupPayloadData(payload))
 }
 
+// UpdateConfigGroup 更新配置分组。
 func UpdateConfigGroup(id string, payload systemRequest.ConfigGroupPayload) (*systemModel.AISystemConfigGroup, error) {
 	return updateRow[systemModel.AISystemConfigGroup]("ai_system_config_group", id, configGroupPayloadData(payload))
 }
 
+// DeleteConfigGroup 删除配置分组。
 func DeleteConfigGroup(id string) error {
 	return deleteByID(&systemModel.AISystemConfigGroup{}, id)
 }
 
+// ConfigList 分页查询配置项，支持按 groupId 过滤。
 func ConfigList(query map[string]string) (*commonResponse.PageResult, error) {
 	var data []systemModel.AISystemConfig
 	return pageList(query, &systemModel.AISystemConfig{}, &data, map[string]string{"name": "name", "key": "`key`"}, map[string]string{"groupId": "group_id"}, "sort ASC, id ASC")
 }
 
+// ConfigInfo 按分组编码或配置 key 查询配置，返回 key → value 的映射。
+// key 是保留字，SQL 里必须用反引号包住，否则语法错误。
 func ConfigInfo(code string) (map[string]string, error) {
 	db, err := systemDB()
 	if err != nil {
@@ -55,6 +62,8 @@ func ConfigInfo(code string) (map[string]string, error) {
 	return result, nil
 }
 
+// BatchUpdateConfig 批量保存一组配置项：有 id 的更新、没 id 的新建，
+// 全部放在一个事务里，避免保存到一半失败产生脏数据。
 func BatchUpdateConfig(payload systemRequest.BatchUpdateConfigPayload) error {
 	db, err := systemDB()
 	if err != nil {
@@ -80,18 +89,22 @@ func BatchUpdateConfig(payload systemRequest.BatchUpdateConfigPayload) error {
 	})
 }
 
+// CreateConfig 新增配置项。
 func CreateConfig(payload systemRequest.ConfigPayload) (*systemModel.AISystemConfig, error) {
 	return createRow[systemModel.AISystemConfig]("ai_system_config", configPayloadData(payload))
 }
 
+// UpdateConfig 更新配置项。
 func UpdateConfig(id string, payload systemRequest.ConfigPayload) (*systemModel.AISystemConfig, error) {
 	return updateRow[systemModel.AISystemConfig]("ai_system_config", id, configPayloadData(payload))
 }
 
+// DeleteConfig 删除配置项。
 func DeleteConfig(id string) error {
 	return deleteByID(&systemModel.AISystemConfig{}, id)
 }
 
+// configPayloadData 把类型化入参转成 GORM 更新 map，nil 字段跳过。
 func configPayloadData(payload systemRequest.ConfigPayload) map[string]interface{} {
 	data := map[string]interface{}{}
 	setColumn(data, "group_id", payload.GroupID)
@@ -108,6 +121,7 @@ func configPayloadData(payload systemRequest.ConfigPayload) map[string]interface
 	return data
 }
 
+// configGroupPayloadData 把类型化入参转成 GORM 更新 map，nil 字段跳过。
 func configGroupPayloadData(payload systemRequest.ConfigGroupPayload) map[string]interface{} {
 	data := map[string]interface{}{}
 	setColumn(data, "name", payload.Name)

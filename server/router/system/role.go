@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// roleRoutes 注册角色管理路由。
 func roleRoutes(system *gin.RouterGroup) {
 	system.GET("/role/index", systemApi.RoleList)
 	system.GET("/role/access", systemApi.RoleAccess)

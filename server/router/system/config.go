@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// configRoutes 注册配置分组与配置项路由。
 func configRoutes(system *gin.RouterGroup) {
 	system.GET("/config-group/index", systemApi.ConfigGroupList)
 	system.POST("/config-group", systemApi.CreateConfigGroup)

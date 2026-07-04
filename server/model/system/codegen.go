@@ -2,6 +2,8 @@ package system
 
 import "time"
 
+// ToolGenerateTable 是代码生成器的表级配置（生成哪个包、什么类名、什么表单样式等）。
+// 注意：本模块 json tag 沿用旧系统的 snake_case，与其他 model 的 camelCase 不同。
 type ToolGenerateTable struct {
 	ID             uint       `json:"id" gorm:"column:id;primaryKey"`
 	CreatedBy      *int       `json:"createdBy" gorm:"column:created_by"`
@@ -31,6 +33,8 @@ func (ToolGenerateTable) TableName() string {
 	return "nest_tool_generate_tables"
 }
 
+// ToolGenerateColumn 是代码生成器的字段级配置（进不进列表/表单/查询、用什么控件）。
+// 布尔语义字段统一用 1 否 / 2 是。
 type ToolGenerateColumn struct {
 	ID            uint       `json:"id" gorm:"column:id;primaryKey"`
 	CreatedBy     *int       `json:"createdBy" gorm:"column:created_by"`

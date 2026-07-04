@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// dictRoutes 注册字典类型与字典数据路由。
 func dictRoutes(system *gin.RouterGroup) {
 	system.GET("/dict-type/index", systemApi.DictTypeList)
 	system.POST("/dict-type", systemApi.CreateDictType)

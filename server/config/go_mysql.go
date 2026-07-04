@@ -27,12 +27,14 @@ type Mysql struct {
 	Config   string
 }
 
+// MysqlPoolConfig 是数据库连接池参数。
 type MysqlPoolConfig struct {
 	MaxIdleConns          int
 	MaxOpenConns          int
 	ConnMaxLifetimeMinute int
 }
 
+// MysqlLogConfig 是 GORM SQL 日志参数（慢查询阈值、日志级别）。
 type MysqlLogConfig struct {
 	SlowThresholdMillisecond int
 	LogLevel                 string

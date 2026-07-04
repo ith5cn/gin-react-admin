@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// CorsConfig 是跨域中间件所需的全部配置。
 type CorsConfig struct {
 	AllowOrigins     []string
 	AllowMethods     []string

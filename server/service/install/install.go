@@ -25,6 +25,7 @@ const (
 	envFilePath  = ".env"
 )
 
+// Status 返回安装状态和可导入的 SQL 文件列表。
 func Status() (installModel.StatusResponse, error) {
 	files, err := SQLFiles()
 	if err != nil {
@@ -37,11 +38,14 @@ func Status() (installModel.StatusResponse, error) {
 	}, nil
 }
 
+// Installed 通过锁文件判断系统是否已完成安装。
+// 用文件而不是数据库做标记，是因为未安装时数据库本身还不可用。
 func Installed() bool {
 	_, err := os.Stat(lockFilePath)
 	return err == nil
 }
 
+// SQLFiles 扫描 sql/ 和 database/ 目录下可执行的初始化 SQL 文件。
 func SQLFiles() ([]string, error) {
 	roots := []string{"sql", "database"}
 	seen := map[string]bool{}
@@ -71,6 +75,7 @@ func SQLFiles() ([]string, error) {
 	return files, nil
 }
 
+// Check 分别探测 MySQL 和 Redis 连接是否可用，安装前的连通性自检。
 func Check(req installModel.CheckRequest) (installModel.CheckResponse, error) {
 	if err := pingMysql(req.Mysql, false); err != nil {
 		return installModel.CheckResponse{}, err
@@ -81,6 +86,8 @@ func Check(req installModel.CheckRequest) (installModel.CheckResponse, error) {
 	return installModel.CheckResponse{MysqlOK: true, RedisOK: true}, nil
 }
 
+// Run 执行完整安装流程：建库 → 导入 SQL → 探测 Redis → 写 .env →
+// 初始化连接 → 写安装锁。锁文件生成后 installGuard 中间件放行业务接口。
 func Run(req installModel.InstallRequest) (map[string]interface{}, error) {
 	if Installed() {
 		return nil, errors.New("系统已安装，如需重新安装请先删除 runtime/install.lock")
@@ -128,6 +135,7 @@ func Run(req installModel.InstallRequest) (map[string]interface{}, error) {
 	}, nil
 }
 
+// pingMysql 用 5 秒超时探测 MySQL 连通性。
 func pingMysql(cfg installModel.MysqlConfig, withDB bool) error {
 	db, err := openMysql(cfg, withDB)
 	if err != nil {
@@ -140,6 +148,7 @@ func pingMysql(cfg installModel.MysqlConfig, withDB bool) error {
 	return db.PingContext(ctx)
 }
 
+// createDatabase 建目标库（若不存在）；库名经 escapeIdentifier 处理防注入。
 func createDatabase(cfg installModel.MysqlConfig) error {
 	db, err := openMysql(cfg, false)
 	if err != nil {
@@ -151,6 +160,7 @@ func createDatabase(cfg installModel.MysqlConfig) error {
 	return err
 }
 
+// importSQLFile 整文件执行初始化 SQL（连接开启了 MultiStatements）。
 func importSQLFile(cfg installModel.MysqlConfig, name string) error {
 	path, err := resolveSQLFile(name)
 	if err != nil {
@@ -174,6 +184,7 @@ func importSQLFile(cfg installModel.MysqlConfig, name string) error {
 	return nil
 }
 
+// openMysql 用 database/sql 直连 MySQL（安装阶段还没有 GORM 连接可用）。
 func openMysql(cfg installModel.MysqlConfig, withDB bool) (*sql.DB, error) {
 	mysqlCfg := mysql.NewConfig()
 	mysqlCfg.Net = "tcp"
@@ -190,6 +201,7 @@ func openMysql(cfg installModel.MysqlConfig, withDB bool) (*sql.DB, error) {
 	return sql.Open("mysql", mysqlCfg.FormatDSN())
 }
 
+// pingRedis 用 5 秒超时探测 Redis 连通性。
 func pingRedis(cfg installModel.RedisConfig) error {
 	client := redisClient(cfg)
 	defer client.Close()

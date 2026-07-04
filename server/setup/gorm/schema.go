@@ -2,6 +2,9 @@ package gormInit
 
 import "gorm.io/gorm"
 
+// ensureAISystemSchema 在启动时做轻量 schema 自检/补齐：
+// 给早期版本缺失的列补 ALTER，并确保代码生成器的两张配置表存在。
+// 项目暂未引入 migration 工具，这里相当于最简版的向前兼容迁移。
 func ensureAISystemSchema(db *gorm.DB) error {
 	if !db.Migrator().HasColumn("ai_system_config_group", "sort") {
 		if err := db.Exec("ALTER TABLE `ai_system_config_group` ADD COLUMN `sort` smallint unsigned NOT NULL DEFAULT 0 COMMENT '排序' AFTER `code`").Error; err != nil {
@@ -80,6 +83,7 @@ CREATE TABLE IF NOT EXISTS nest_tool_generate_columns (
 	return nil
 }
 
+// ensureCodegenSoftDeleteColumns 为 codegen 配置表补齐软删除列。
 func ensureCodegenSoftDeleteColumns(db *gorm.DB) error {
 	tables := []string{"nest_tool_generate_tables", "nest_tool_generate_columns"}
 	for _, table := range tables {

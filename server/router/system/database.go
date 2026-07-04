@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// databaseRoutes 注册数据库维护路由，单独挂在 /data 分组下。
 func databaseRoutes(PrivateGroup *gin.RouterGroup) {
 	data := PrivateGroup.Group("/data")
 	data.GET("/database/index", systemApi.DatabaseTableList)

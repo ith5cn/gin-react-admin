@@ -69,10 +69,12 @@ func QueryMap(c *gin.Context) map[string]string {
 	return queryMap(c)
 }
 
+// BindJSONMap 是 bindJSONMap 的导出包装（codegen 契约）。
 func BindJSONMap(c *gin.Context) (map[string]interface{}, bool) {
 	return bindJSONMap(c)
 }
 
+// SuccessOrFail 是 successOrFail 的导出包装（codegen 契约）。
 func SuccessOrFail(c *gin.Context, data interface{}, err error) {
 	successOrFail(c, data, err)
 }

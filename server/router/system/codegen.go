@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// codegenRoutes 注册代码生成器路由。
 func codegenRoutes(system *gin.RouterGroup) {
 	system.GET("/codegen/index", systemApi.CodegenList)
 	system.GET("/codegen/datasources", systemApi.CodegenDatasources)

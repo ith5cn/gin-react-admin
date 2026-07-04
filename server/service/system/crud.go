@@ -31,18 +31,24 @@ func pageList(query map[string]string, model interface{}, dest interface{}, like
 	return &commonResponse.PageResult{List: dest, Total: total}, nil
 }
 
+// PageList 是老版分页契约：likes 全部按 LIKE、equals 全部按 = 处理。
+// 仅为兼容早期 codegen 生成的代码保留，新生成的代码走 PageListFiltered。
 func PageList(query map[string]string, model interface{}, dest interface{}, likes map[string]string, equals map[string]string, order string) (*commonResponse.PageResult, error) {
 	return pageList(query, model, dest, likes, equals, order)
 }
 
+// CreateRecord 是 codegen 生成代码的通用创建入口：
+// 把前端传来的 camelCase 字段名转成 snake_case 列名后插入。
 func CreateRecord[T any](table string, data map[string]interface{}) (*T, error) {
 	return createRow[T](table, requestData(data, passthroughColumns(data)))
 }
 
+// UpdateRecord 是 codegen 生成代码的通用更新入口，逻辑同 CreateRecord。
 func UpdateRecord[T any](table string, id string, data map[string]interface{}) (*T, error) {
 	return updateRow[T](table, id, requestData(data, passthroughColumns(data)))
 }
 
+// DeleteRecord 是 codegen 生成代码的通用硬删除入口。
 func DeleteRecord(model interface{}, id string) error {
 	return deleteByID(model, id)
 }
@@ -150,6 +156,7 @@ func splitQueryValues(value string) []string {
 	return result
 }
 
+// passthroughColumns 为动态数据生成"参数名 → 列名"映射（camelCase → snake_case）。
 func passthroughColumns(data map[string]interface{}) map[string]string {
 	columns := make(map[string]string, len(data))
 	for key := range data {
@@ -158,6 +165,8 @@ func passthroughColumns(data map[string]interface{}) map[string]string {
 	return columns
 }
 
+// createWithLevel 在插入前先维护树形表的 parent_id/level 字段，
+// 用于菜单、角色、部门这类有层级关系的表。
 func createWithLevel[T any](table string, payload map[string]interface{}) (*T, error) {
 	db, err := systemDB()
 	if err != nil {
@@ -182,6 +191,8 @@ func setColumn[T any](payload map[string]interface{}, column string, value *T) {
 	}
 }
 
+// createRow 通用插入：写入创建/更新时间后 INSERT，再回查一条最新记录返回。
+// 注意：用 map 插入拿不到自增 ID，这里按 id DESC 回查，高并发下可能取错行。
 func createRow[T any](table string, payload map[string]interface{}) (*T, error) {
 	db, err := systemDB()
 	if err != nil {
@@ -198,6 +209,7 @@ func createRow[T any](table string, payload map[string]interface{}) (*T, error) 
 	return &result, nil
 }
 
+// updateRow 通用更新：只更新 payload 里出现的列，然后回查该行返回。
 func updateRow[T any](table string, id string, payload map[string]interface{}) (*T, error) {
 	db, err := systemDB()
 	if err != nil {
@@ -214,6 +226,7 @@ func updateRow[T any](table string, id string, payload map[string]interface{}) (
 	return &result, nil
 }
 
+// updateWithLevel 更新树形表数据，父级变化时同步重算 level。
 func updateWithLevel[T any](table string, id string, payload map[string]interface{}) (*T, error) {
 	db, err := systemDB()
 	if err != nil {
@@ -231,6 +244,9 @@ func updateWithLevel[T any](table string, id string, payload map[string]interfac
 	return &result, nil
 }
 
+// normalizeParentAndLevel 维护树形表的层级路径：
+// 无父节点时 parent_id=0、level="0"；有父节点时 level = 父节点 level + "," + 父ID，
+// 这样查某节点的所有祖先只需要按逗号拆 level 字符串。
 func normalizeParentAndLevel(db *gorm.DB, table string, payload map[string]interface{}) {
 	parentID, ok := payload["parent_id"]
 	if !ok || fmt.Sprint(parentID) == "" || fmt.Sprint(parentID) == "0" || fmt.Sprint(parentID) == "<nil>" {
@@ -248,6 +264,7 @@ func normalizeParentAndLevel(db *gorm.DB, table string, payload map[string]inter
 	payload["level"] = "0"
 }
 
+// parseUint 把字符串 ID 转成 uint，路径参数转数字的通用小工具。
 func parseUint(value string) (uint, error) {
 	id, err := strconv.ParseUint(value, 10, 64)
 	return uint(id), err

@@ -5,6 +5,7 @@ import (
 	systemRequest "server/model/system/request"
 )
 
+// DeptList 查询部门并组装成树形结构。
 func DeptList(query map[string]string) ([]*systemModel.AISystemDept, error) {
 	db, err := systemDB()
 	if err != nil {
@@ -19,14 +20,17 @@ func DeptList(query map[string]string) ([]*systemModel.AISystemDept, error) {
 	return BuildDeptTree(depts), nil
 }
 
+// CreateDept 新增部门，level 层级路径由 createWithLevel 自动维护。
 func CreateDept(payload systemRequest.DeptPayload) (*systemModel.AISystemDept, error) {
 	return createWithLevel[systemModel.AISystemDept]("ai_system_dept", deptPayloadData(payload))
 }
 
+// UpdateDept 更新部门，父级变化时同步重算 level。
 func UpdateDept(id string, payload systemRequest.DeptPayload) (*systemModel.AISystemDept, error) {
 	return updateWithLevel[systemModel.AISystemDept]("ai_system_dept", id, deptPayloadData(payload))
 }
 
+// DeleteDept 删除部门；存在子部门时拒绝删除。
 func DeleteDept(id string) error {
 	has, err := hasChildren("ai_system_dept", id)
 	if err != nil {
@@ -38,6 +42,8 @@ func DeleteDept(id string) error {
 	return deleteByID(&systemModel.AISystemDept{}, id)
 }
 
+// DeptAccess 返回启用状态的部门，tree=true 时返回树形结构（下拉树用），
+// 否则返回扁平列表。
 func DeptAccess(tree bool) (interface{}, error) {
 	db, err := systemDB()
 	if err != nil {
@@ -53,6 +59,7 @@ func DeptAccess(tree bool) (interface{}, error) {
 	return depts, nil
 }
 
+// BuildDeptTree 把扁平部门列表组装成树，算法同 BuildMenuTree。
 func BuildDeptTree(depts []systemModel.AISystemDept) []*systemModel.AISystemDept {
 	nodeMap := make(map[uint]*systemModel.AISystemDept, len(depts))
 	roots := make([]*systemModel.AISystemDept, 0)
