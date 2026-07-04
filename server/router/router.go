@@ -10,6 +10,7 @@ import (
 	installRouter "server/router/install"
 	systemRouter "server/router/system"
 	installService "server/service/install"
+	systemService "server/service/system"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -24,6 +25,9 @@ func NewRouter() *gin.Engine {
 	Router.Use(middleware.CORS())
 	// Router.Use(installGuard())
 
+	// 本地上传的文件通过 /uploads 前缀静态访问（开发态由 Vite 代理转发到后端）。
+	Router.Static("/uploads", systemService.UploadRoot)
+
 	// registerGroups 按指定前缀注册一套公开路由和私有路由。
 	// 私有路由统一挂 JWT 中间件，业务模块只需要关心自己的 URL 分组。
 	registerGroups := func(prefix string) {
@@ -32,6 +36,8 @@ func NewRouter() *gin.Engine {
 
 		installRouter.Router(PublicGroup)
 		PrivateGroup.Use(middleware.JWTAuth())
+		// 操作日志在鉴权之后记录，能拿到用户名；只记 POST/PUT/DELETE 写操作。
+		PrivateGroup.Use(middleware.OperLog())
 
 		systemRouter.BaseRouter(PublicGroup, PrivateGroup) // 系统基础路由
 		generatedRouter.RegisterRoutes(PrivateGroup)

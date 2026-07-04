@@ -38,17 +38,17 @@ const PostIndex = () => {
                     api: postListApi,
                     add: {
                         show: true,
-                        auth: ['/system/post/create'],
+                        auth: ['system/post/create'],
                         func: () => editRef.current?.open('add'),
                     },
                     edit: {
                         show: true,
-                        auth: ['/system/post/update'],
+                        auth: ['system/post/update'],
                         func: (record: any) => editRef.current?.open('edit', record),
                     },
                     delete: {
                         show: true,
-                        auth: ['/system/post/destroy'],
+                        auth: ['system/post/destroy'],
                         func: async (record: any) => {
                             const res = await postDeleteApi(record.id);
                             if (res.code === 0) {

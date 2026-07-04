@@ -24,17 +24,17 @@ const DeptIndex = () => {
           api: deptListApi,
           add: {
             show: true,
-            auth: ["/system/dept/create"],
+            auth: ["system/dept/create"],
             func: () => editRef.current?.open("add"),
           },
           edit: {
             show: true,
-            auth: ["/system/dept/update"],
+            auth: ["system/dept/update"],
             func: (record: any) => editRef.current?.open("edit", record),
           },
           delete: {
             show: true,
-            auth: ["/system/dept/destroy"],
+            auth: ["system/dept/destroy"],
             func: async (record: any) => {
               const res = await deptDeleteApi(record.id);
               if (res.code === 0) {

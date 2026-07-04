@@ -19,7 +19,22 @@ var ErrLoginFailed = errors.New("user_name or password is incorrect")
 // 1. 从 ai_system_user 表按 username 查询用户。
 // 2. 校验账号状态和 bcrypt 密码。
 // 3. 校验成功后签发 JWT access token 和 refresh token。
-func Login(userName string, password string) (*utils.TokenPair, error) {
+// 无论成败都会写一条登录日志（clientIP/userAgent 由 handler 从请求中提取）。
+func Login(userName string, password string, clientIP string, userAgent string) (*utils.TokenPair, error) {
+	tokens, err := loginInternal(userName, password)
+
+	// 登录日志的成败不影响登录结果本身，失败只记服务端日志。
+	message := "登录成功"
+	if err != nil {
+		// 对外统一泛化文案，日志里也不区分具体原因，避免日志泄露账号状态。
+		message = "登录失败"
+	}
+	RecordLoginLog(userName, clientIP, userAgent, err == nil, message)
+
+	return tokens, err
+}
+
+func loginInternal(userName string, password string) (*utils.TokenPair, error) {
 	if gormInit.Gorm.Databases == nil || gormInit.Gorm.Databases.AISystem == nil {
 		return nil, errors.New("ai_system is not initialized")
 	}

@@ -31,3 +31,20 @@ type UserPayload struct {
 type SetPasswordPayload struct {
 	Password string `json:"password" binding:"required"`
 }
+
+// ProfilePayload 是个人中心资料更新入参，只包含用户可以改自己的安全字段。
+type ProfilePayload struct {
+	Nickname       *string `json:"nickname"`
+	Phone          *string `json:"phone"`
+	Email          *string `json:"email"`
+	Avatar         *string `json:"avatar"`
+	Signed         *string `json:"signed"`
+	Dashboard      *string `json:"dashboard"`
+	BackendSetting *string `json:"backendSetting"`
+}
+
+// ChangePasswordPayload 是用户修改自己密码的入参，必须携带原密码。
+type ChangePasswordPayload struct {
+	OldPassword string `json:"oldPassword" binding:"required"`
+	NewPassword string `json:"newPassword" binding:"required,min=6"`
+}

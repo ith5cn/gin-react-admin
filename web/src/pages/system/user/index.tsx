@@ -101,12 +101,12 @@ const UserIndex = () => {
                         pageSize: 10,
                         add: {
                             func: () => editRef.current?.open('add'),
-                            auth: ['/system/user/create'],
+                            auth: ['system/user/create'],
                             show: true
                         },
                         edit: {
                             func: (record: any) => editRef.current?.open('edit', record),
-                            auth: ['/system/user/update'],
+                            auth: ['system/user/update'],
                             show: true
                         },
                         delete: {
@@ -117,7 +117,7 @@ const UserIndex = () => {
                                     tableRef.current?.refresh();
                                 }
                             },
-                            auth: ['/system/user/destroy'],
+                            auth: ['system/user/destroy'],
                             show: true
                         },
                         operationColumnWidth: 220

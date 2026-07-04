@@ -31,4 +31,7 @@ var (
 	ErrNoImportTables     = NewBizError("请选择要导入的数据表")
 	ErrNoDeleteTables     = NewBizError("请选择要删除的数据表")
 	ErrEmptyTableName     = NewBizError("存在未填写表名的数据表")
+	ErrUploadEmptyFile    = NewBizError("上传文件内容为空")
+	ErrUploadNotImage     = NewBizError("文件内容不是有效的图片")
+	ErrOldPasswordWrong   = NewBizError("原密码不正确")
 )

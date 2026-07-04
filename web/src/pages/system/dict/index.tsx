@@ -67,12 +67,12 @@ const DictTypeIndex = () => {
                         searchColSpan: 6,
                         add: {
                             func: () => editRef.current?.open(),
-                            auth: ['/system/dict-type/create'],
+                            auth: ['system/dict-type/create'],
                             show: true
                         },
                         edit: {
                             func: (record: any) => editRef.current?.open(record),
-                            auth: ['/system/dict-type/update'],
+                            auth: ['system/dict-type/update'],
                             show: true
                         },
                         delete: {
@@ -83,7 +83,7 @@ const DictTypeIndex = () => {
                                     tableRef.current?.refresh();
                                 }
                             },
-                            auth: ['/system/dict-type/destroy'],
+                            auth: ['system/dict-type/destroy'],
                             show: true
                         },
                         operationColumnWidth: 220

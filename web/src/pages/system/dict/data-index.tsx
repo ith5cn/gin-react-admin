@@ -72,12 +72,12 @@ const DictDataIndex: React.FC<DictDataIndexProps> = ({ dictType, onClose }) => {
                         api: apiWithTypeId,
                         add: {
                             func: () => editRef.current?.open(dictType.id),
-                            auth: ['/system/dict-type/update'],
+                            auth: ['system/dict-type/update'],
                             show: true
                         },
                         edit: {
                             func: (record: any) => editRef.current?.open(dictType.id, record),
-                            auth: ['/system/dict-type/update'],
+                            auth: ['system/dict-type/update'],
                             show: true
                         },
                         delete: {
@@ -90,7 +90,7 @@ const DictDataIndex: React.FC<DictDataIndexProps> = ({ dictType, onClose }) => {
                                     message.error(res.message || "删除失败");
                                 }
                             },
-                            auth: ['/system/dict-type/update'],
+                            auth: ['system/dict-type/update'],
                             show: true
                         },
                         operationColumnWidth: 150

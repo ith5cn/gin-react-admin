@@ -20,7 +20,8 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	tokens, err := systemService.Login(loginReq.UserName, loginReq.Password)
+	// ClientIP 会正确处理反向代理头（X-Forwarded-For 等），UserAgent 用于登录日志。
+	tokens, err := systemService.Login(loginReq.UserName, loginReq.Password, c.ClientIP(), c.Request.UserAgent())
 	if err != nil {
 		// 登录失败统一返回泛化错误，避免暴露用户是否存在。
 		status := http.StatusInternalServerError

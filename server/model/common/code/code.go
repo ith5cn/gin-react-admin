@@ -9,6 +9,7 @@ const (
 	OperationFailed    = 40002 // 业务规则拒绝（BizError），msg 可直接展示给用户。
 	AccessTokenExpired = 40101 // access token 过期，前端应拿 refresh token 换新。
 	LoginRequired      = 40102 // 未登录或 token 无效，需要重新登录。
+	PermissionDenied   = 40301 // 已登录但没有该接口的权限码。
 	SystemError        = 50001 // 系统内部错误，细节只进服务端日志。
 )
 
@@ -18,6 +19,7 @@ var messages = map[int]string{
 	OperationFailed:    "操作失败",
 	AccessTokenExpired: "access token expired, please refresh token",
 	LoginRequired:      "please login again",
+	PermissionDenied:   "无权限执行该操作",
 	SystemError:        "系统异常",
 }
 

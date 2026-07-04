@@ -12,6 +12,10 @@ func ensureAISystemSchema(db *gorm.DB) error {
 		}
 	}
 
+	if err := ensurePermissionCodes(db); err != nil {
+		return err
+	}
+
 	if err := db.Exec(`
 CREATE TABLE IF NOT EXISTS nest_tool_generate_tables (
   id int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -81,6 +85,101 @@ CREATE TABLE IF NOT EXISTS nest_tool_generate_columns (
 	}
 
 	return nil
+}
+
+// legacyPermCodeMapping 是旧系统按钮权限码到本项目统一规范（system/<模块>/<动作>）的映射。
+// 接口级权限中间件（middleware.Perm）按新码校验，老库启动时在这里一次性归一化。
+// UPDATE 按 code 精确匹配，重复执行无副作用（幂等）。
+var legacyPermCodeMapping = map[string]string{
+	"/core/user/index":               "system/user/index",
+	"/core/user/save":                "system/user/create",
+	"/core/user/update":              "system/user/update",
+	"/core/user/destroy":             "system/user/destroy",
+	"/core/user/read":                "system/user/read",
+	"/core/user/changeStatus":        "system/user/change-status",
+	"/core/user/initUserPassword":    "system/user/set-password",
+	"/core/user/clearCache":          "system/user/refresh-cache",
+	"/core/user/setHomePage":         "system/user/set-home-page",
+	"/core/menu/index":               "system/menu/index",
+	"/core/menu/save":                "system/menu/create",
+	"/core/menu/update":              "system/menu/update",
+	"/core/menu/destroy":             "system/menu/destroy",
+	"/core/menu/read":                "system/menu/read",
+	"/core/dept/index":               "system/dept/index",
+	"/core/dept/save":                "system/dept/create",
+	"/core/dept/update":              "system/dept/update",
+	"/core/dept/destroy":             "system/dept/destroy",
+	"/core/dept/read":                "system/dept/read",
+	"/core/dept/leaders":             "system/dept/leaders",
+	"/core/role/index":               "system/role/index",
+	"/core/role/save":                "system/role/create",
+	"/core/role/update":              "system/role/update",
+	"/core/role/destroy":             "system/role/destroy",
+	"/core/role/read":                "system/role/read",
+	"/core/role/menuPermission":      "system/role/menu-permission",
+	"/core/post/index":               "system/post/index",
+	"/core/post/save":                "system/post/create",
+	"/core/post/update":              "system/post/update",
+	"/core/post/destroy":             "system/post/destroy",
+	"/core/post/read":                "system/post/read",
+	"/core/post/changeStatus":        "system/post/change-status",
+	"/core/post/import":              "system/post/import",
+	"/core/post/export":              "system/post/export",
+	"/core/dictType/index":           "system/dict-type/index",
+	"/core/dictType/save":            "system/dict-type/create",
+	"/core/dictType/update":          "system/dict-type/update",
+	"/core/dictType/destroy":         "system/dict-type/destroy",
+	"/core/dictType/read":            "system/dict-type/read",
+	"/core/dictType/changeStatus":    "system/dict-type/change-status",
+	"/core/attachment/index":         "system/attachment/index",
+	"/core/attachment/destroy":       "system/attachment/destroy",
+	"/core/database/index":           "system/database/index",
+	"/core/database/detailed":        "system/database/columns",
+	"/core/database/fragment":        "system/database/fragment",
+	"/core/database/optimize":        "system/database/optimize",
+	"/core/database/recycle":         "system/database/recycle",
+	"/core/database/delete":          "system/database/destroy",
+	"/core/database/recovery":        "system/database/recover",
+	"/core/config/index":             "system/config/index",
+	"/core/config/save":              "system/config/create",
+	"/core/config/update":            "system/config/update",
+	"/core/config/destroy":           "system/config/destroy",
+	"/core/logs/getLoginLogPageList": "system/login-log/index",
+	"/core/logs/getOperLogPageList":  "system/oper-log/index",
+	"/core/notice/index":             "system/notice/index",
+	"/core/notice/save":              "system/notice/create",
+	"/core/notice/update":            "system/notice/update",
+	"/core/notice/destroy":           "system/notice/destroy",
+	"/core/notice/read":              "system/notice/read",
+	"/core/email/index":              "system/email/index",
+	"/core/email/destroy":            "system/email/destroy",
+	"/core/system/monitor":           "system/monitor/index",
+	"/core/system/getUserList":       "system/user/auth-list",
+	"/core/system/getUserInfoByIds":  "system/user/info-by-ids",
+	"/tool/code/index":               "system/codegen/index",
+	"/tool/code/access":              "system/codegen/access",
+	"/tool/crontab/index":            "system/crontab/index",
+	"/tool/crontab/save":             "system/crontab/create",
+	"/tool/crontab/update":           "system/crontab/update",
+	"/tool/crontab/destroy":          "system/crontab/destroy",
+	"/tool/crontab/read":             "system/crontab/read",
+	"/tool/crontab/changeStatus":     "system/crontab/change-status",
+	"/tool/crontab/run":              "system/crontab/run",
+	"/tool/crontab/deleteLog":        "system/crontab/delete-log",
+}
+
+// ensurePermissionCodes 把菜单表里遗留的旧权限码归一化成新规范。
+func ensurePermissionCodes(db *gorm.DB) error {
+	for oldCode, newCode := range legacyPermCodeMapping {
+		if err := db.Exec("UPDATE `ai_system_menu` SET `code` = ? WHERE `code` = ? AND `type` = 'B'", newCode, oldCode).Error; err != nil {
+			return err
+		}
+	}
+	// 种子数据里"登录日志删除/操作日志删除"两行共用了同一个旧码，按名称拆开。
+	if err := db.Exec("UPDATE `ai_system_menu` SET `code` = 'system/login-log/destroy' WHERE `code` = '/core/logs/deleteOperLog' AND `name` = '登录日志删除'").Error; err != nil {
+		return err
+	}
+	return db.Exec("UPDATE `ai_system_menu` SET `code` = 'system/oper-log/destroy' WHERE `code` = '/core/logs/deleteOperLog'").Error
 }
 
 // ensureCodegenSoftDeleteColumns 为 codegen 配置表补齐软删除列。

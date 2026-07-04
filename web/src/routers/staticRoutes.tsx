@@ -30,4 +30,16 @@ export const staticRoutes: StaticRouteConfig[] = [
     },
     element: <DynamicDashboard />,
   },
+  {
+    // 个人中心从头像下拉进入，不在侧边菜单展示。
+    path: '/profile',
+    name: '个人中心',
+    isLayout: true,
+    meta: {
+      title: '个人中心',
+      icon: 'UserOutlined',
+      hidden: true,
+    },
+    element: createRouteElement('/profile', 'profile/index'),
+  },
 ]

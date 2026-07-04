@@ -33,6 +33,8 @@ export interface UserInfo {
   nickname?: string | null
   phone?: string | null
   email?: string | null
+  avatar?: string | null
+  signed?: string | null
   deptId?: number | null
   postId?: number | null
   status?: number

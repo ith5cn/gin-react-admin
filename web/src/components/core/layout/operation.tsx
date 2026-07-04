@@ -13,12 +13,18 @@ export const Operation = () => {
   const [settingVisible, setSettingVisible] = useState(false)
 
   const items: MenuProps['items'] = [
+    { key: 'profile', label: '个人中心', icon: <UserOutlined /> },
     { key: 'clear-cache', label: '清除缓存', icon: <ClearOutlined /> },
     { type: 'divider' },
     { key: 'logout', label: '退出登录', icon: <LogoutOutlined />, danger: true },
   ]
 
   const handleMenuClick: MenuProps['onClick'] = async ({ key }) => {
+    if (key === 'profile') {
+      navigate('/profile')
+      return
+    }
+
     if (key === 'clear-cache') {
       localStorage.clear()
       sessionStorage.clear()

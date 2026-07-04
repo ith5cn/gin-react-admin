@@ -565,6 +565,10 @@ func CreatePost(...) (*AISystemPost, error) {
 
 **超级管理员**（id=1 或 code=admin）跳过角色过滤直接拿全部菜单，权限码返回 `"*"`。
 
+**接口级校验（真正的防线）**：前端按权限码控制按钮显隐只能"拦君子"——拿到 token 的人完全可以用 curl 直接调接口。所以每条写接口都挂了 `middleware.Perm("system/user/destroy")` 这样的权限中间件（`middleware/permission.go`）：JWT 确认"你是谁"之后，Perm 再查 用户→角色→按钮菜单 确认"你能不能做这件事"，没有权限码返回 HTTP 403 + 业务码 40301。校验失败时**拒绝放行（fail closed）**——权限系统故障时宁可误伤，不能敞开。
+
+> **面试常问**：前端隐藏按钮算不算权限控制？（不算，必须后端拦截；前端只是体验优化）
+
 **树形数据的存储技巧**：表里存 `parent_id`（谁是我爸）+ `level`（祖先路径，如 `"0,1,5"`）。`level` 是空间换时间——查某节点所有后代只需 `level LIKE '0,1,5%'`，不用递归。`normalizeParentAndLevel` 负责维护它。
 
 > **面试常问**

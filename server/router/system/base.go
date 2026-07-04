@@ -30,5 +30,7 @@ func BaseRouter(PublicGroup, PrivateGroup *gin.RouterGroup) {
 	logRoutes(system)
 	attachmentRoutes(system)
 	codegenRoutes(system)
+	uploadRoutes(system)
+	profileRoutes(system)
 	databaseRoutes(PrivateGroup)
 }

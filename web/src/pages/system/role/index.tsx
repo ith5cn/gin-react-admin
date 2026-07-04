@@ -50,17 +50,17 @@ const RoleIndex = () => {
                     api: roleListApi,
                     add: {
                         show: true,
-                        auth: ['/system/role/create'],
+                        auth: ['system/role/create'],
                         func: () => editRef.current?.open('add'),
                     },
                     edit: {
                         show: true,
-                        auth: ['/system/role/update'],
+                        auth: ['system/role/update'],
                         func: (record: { id: number }) => editRef.current?.open('edit', record),
                     },
                     delete: {
                         show: true,
-                        auth: ['/system/role/destroy'],
+                        auth: ['system/role/destroy'],
                         func: async (record: { id: number }) => {
                             const res = await roleDeleteApi(record.id);
                             if (res.code === 0) {
