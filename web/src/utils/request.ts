@@ -1,6 +1,7 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import { message as Message } from 'antd'
 import { clearAuthSession, useAuthStore } from '@/store/auth'
+import { navigateTo } from '@/utils/navigateHelper'
 
 export interface Result<T = any> {
   code: number
@@ -30,9 +31,9 @@ let refreshPromise: Promise<string> | null = null
 
 const redirectToLogin = () => {
   clearAuthSession()
-  if (window.location.pathname !== '/login') {
-    window.location.href = '/login'
-  }
+  // navigateTo 使用 React Router navigate（SPA 跳转，无全页刷新）。
+  // 对于 Layout 外的路由（如 /install），Layout 不会自动接管，因此需要主动跳转。
+  navigateTo('/login')
 }
 
 const updateTokenSession = (tokenPair: any) => {

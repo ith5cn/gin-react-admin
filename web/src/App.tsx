@@ -1,10 +1,20 @@
 import { ConfigProvider } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import enUS from 'antd/locale/en_US'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import RenderRoutes from '@/routers'
 import useAppStore from '@/store/useAppStore'
+import { setNavigate } from '@/utils/navigateHelper'
+
+const NavigateSetter = () => {
+  const navigate = useNavigate()
+  useEffect(() => {
+    setNavigate(navigate)
+  }, [navigate])
+  return null
+}
 
 function App() {
   const { i18n } = useTranslation()
@@ -32,6 +42,7 @@ function App() {
         }`}
       </style>
       <BrowserRouter>
+        <NavigateSetter />
         <RenderRoutes />
       </BrowserRouter>
     </ConfigProvider>

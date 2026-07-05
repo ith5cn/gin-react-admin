@@ -23,7 +23,7 @@ func NewRouter() *gin.Engine {
 	Router.Use(middleware.Recovery())
 	Router.Use(middleware.RequestLogger())
 	Router.Use(middleware.CORS())
-	// Router.Use(installGuard())
+	Router.Use(installGuard())
 
 	// 本地上传的文件通过 /uploads 前缀静态访问（开发态由 Vite 代理转发到后端）。
 	Router.Static("/uploads", systemService.UploadRoot)
