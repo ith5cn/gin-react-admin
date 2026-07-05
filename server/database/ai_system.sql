@@ -373,6 +373,8 @@ INSERT INTO `ai_system_menu` VALUES (1106, 1100, '0,1000,1100', '用户状态改
 INSERT INTO `ai_system_menu` VALUES (1107, 1100, '0,1000,1100', '用户重置密码', 'system/user/set-password', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1108, 1100, '0,1000,1100', '更新用户缓存', 'system/user/refresh-cache', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1109, 1100, '0,1000,1100', '设置用户首页', 'system/user/set-home-page', '', NULL, '', NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (1110, 1100, '0,1000,1100', '用户导入', 'system/user/import', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2026-07-04 00:00:00', '2026-07-04 00:00:00', NULL);
+INSERT INTO `ai_system_menu` VALUES (1111, 1100, '0,1000,1100', '用户导出', 'system/user/export', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2026-07-04 00:00:00', '2026-07-04 00:00:00', NULL);
 INSERT INTO `ai_system_menu` VALUES (1200, 1000, '0,1000', '菜单管理', 'permission/menu', 'IconMenu', 'permission/menu', 'system/menu/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1201, 1200, '0,1000,1200', '菜单列表', 'system/menu/index', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1202, 1200, '0,1000,1200', '菜单保存', 'system/menu/create', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
@@ -564,6 +566,29 @@ CREATE TABLE `ai_system_role_dept`  (
 
 -- ----------------------------
 -- Records of ai_system_role_dept
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for ai_system_notice
+-- ----------------------------
+DROP TABLE IF EXISTS `ai_system_notice`;
+CREATE TABLE `ai_system_notice`  (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '公告标题',
+  `type` smallint NOT NULL DEFAULT 2 COMMENT '类型 (1通知 2公告)',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL COMMENT '公告内容',
+  `status` smallint NOT NULL DEFAULT 1 COMMENT '状态 (1正常 2停用)',
+  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '备注',
+  `created_by` int NULL DEFAULT NULL COMMENT '创建者',
+  `updated_by` int NULL DEFAULT NULL COMMENT '更新者',
+  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `update_time` datetime NULL DEFAULT NULL COMMENT '修改时间',
+  `delete_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '通知公告表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of ai_system_notice
 -- ----------------------------
 
 -- ----------------------------

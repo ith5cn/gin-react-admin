@@ -35,5 +35,7 @@ func BaseRouter(PublicGroup, PrivateGroup *gin.RouterGroup) {
 	crontabRoutes(system)
 	regionRoutes(system)
 	onlineRoutes(system)
+	noticeRoutes(system)
+	monitorRoutes(system)
 	databaseRoutes(PrivateGroup)
 }

@@ -7,10 +7,18 @@ import { Button, Col, Dropdown, Form, Input, Space, Switch, message } from "antd
 import dayjs from "dayjs";
 import Edit, { type EditRef } from "./edit";
 import type { TableRef } from "@/components/ith5ui/ith5-table";
-import { EllipsisOutlined, ReloadOutlined } from "@ant-design/icons";
+import { DownloadOutlined, EllipsisOutlined, ReloadOutlined } from "@ant-design/icons";
 import { type Ith5DictModalRef } from "@/components/ith5ui/ith5-dict-modal";
+import request from "@/utils/request";
+import { useAuthStore } from "@/store/auth";
 
-const StatusSwitch = ({ record }: { record: any }) => {
+type UserRecord = {
+    id: number;
+    status: number;
+    [key: string]: unknown;
+};
+
+const StatusSwitch = ({ record }: { record: UserRecord }) => {
     const [loading, setLoading] = useState(false);
     const [checked, setChecked] = useState(record.status == 1);
 
@@ -25,7 +33,7 @@ const StatusSwitch = ({ record }: { record: any }) => {
             } else {
                 message.error(res.message || '更新失败');
             }
-        } catch (error) {
+        } catch {
             message.error('更新失败');
         } finally {
             setLoading(false);
@@ -40,6 +48,26 @@ const UserIndex = () => {
     const editRef = useRef<EditRef>(null);
     const tableRef = useRef<TableRef>(null);
     const setHomeRef = useRef<Ith5DictModalRef>(null);
+    const codes = useAuthStore((state) => state.codes);
+    const canExport = codes.includes("*") || codes.includes("system/user/export");
+
+    // 导出走 blob 下载：数据范围和列表接口一致（服务端按数据权限过滤）
+    const handleExport = async () => {
+        message.info("正在导出...");
+        try {
+            const blob = await request.downloadFile("/system/user/export");
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = blobUrl;
+            link.download = `users_${dayjs().format("YYYYMMDDHHmmss")}.xlsx`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch {
+            // 错误已由 request 拦截器统一处理
+        }
+    };
 
     const handleDeptSelect = (deptId: Key | undefined) => {
         setSelectedDeptId(deptId);
@@ -55,7 +83,7 @@ const UserIndex = () => {
             } else {
                 message.error(res.message || '缓存刷新失败');
             }
-        } catch (error) {
+        } catch {
             message.error('缓存刷新失败');
         }
     }
@@ -105,12 +133,12 @@ const UserIndex = () => {
                             show: true
                         },
                         edit: {
-                            func: (record: any) => editRef.current?.open('edit', record),
+                            func: (record: UserRecord) => editRef.current?.open('edit', record),
                             auth: ['system/user/update'],
                             show: true
                         },
                         delete: {
-                            func: async (record: any) => {
+                            func: async (record: UserRecord) => {
                                 const res = await userDeleteApi(record.id)
                                 if (res.code === 0) {
                                     message.success("删除成功")
@@ -120,15 +148,29 @@ const UserIndex = () => {
                             auth: ['system/user/destroy'],
                             show: true
                         },
+                        import: {
+                            show: true,
+                            text: '导入',
+                            url: '/system/user/import',
+                            templateUrl: '/system/user/import-template',
+                            auth: ['system/user/import'],
+                        },
                         operationColumnWidth: 220
                     }}
+                    BeforeHeaderExtend={
+                        canExport ? (
+                            <Button icon={<DownloadOutlined />} onClick={handleExport}>
+                                导出
+                            </Button>
+                        ) : undefined
+                    }
                     columns={[
                         { title: '账号', dataIndex: 'username' },
                         { title: '昵称', dataIndex: 'nickname' },
                         { title: '手机', dataIndex: 'phone' },
                         { title: '邮箱', dataIndex: 'email' },
-                        { title: '状态', dataIndex: 'status', render: (_: any, record: any) => <StatusSwitch record={record} /> },
-                        { title: '创建时间', dataIndex: 'createTime', render: (text: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
+                        { title: '状态', dataIndex: 'status', render: (_: unknown, record: UserRecord) => <StatusSwitch record={record} /> },
+                        { title: '创建时间', dataIndex: 'createTime', render: (text: string) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
                     ] as ColumnDef[]}
                     operationCell={(record) => {
                         // 只有 id 为 1 时展示更新缓存，其余可能返回默认或空

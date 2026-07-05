@@ -642,6 +642,26 @@ main.go 启动时 StartCrontabScheduler()
 
 ---
 
+## 15.5 Excel 导入导出与服务监控
+
+**用户 Excel 导入导出**（`service/system/user_excel.go`，用 `xuri/excelize/v2`）：
+
+- 导出、模板、导入三处**共用同一份表头**（`userExcelHeaders`）——用户的习惯是"导出改一改再导回来"，表头对不上是最恼人的 bug。
+- 导出与列表接口走**同一套过滤 + 数据权限**：导出的永远是操作者"看得到"的数据，不能成为越权读数据的后门。
+- 导入逐行处理，**单行失败不中断**，最后汇总"成功 N 条，失败 M 条 + 逐行原因"；全部失败才返回业务错误。
+- 初始密码整批只做一次 bcrypt——bcrypt 故意慢（约 60ms/次），逐行加密会让千行导入慢到分钟级。
+- 文件流响应绕过统一 JSON 格式：`c.Data(200, xlsx MIME, bytes)` + `Content-Disposition: attachment`，前端用 `responseType: 'blob'` 接。
+
+**服务监控**（`service/system/monitor.go`，用 `shirou/gopsutil/v4`）：
+
+- CPU/内存/磁盘来自 gopsutil；Go 进程信息来自标准库 `runtime`（goroutine 数、堆内存、GC 次数）；Redis 信息来自 `INFO` 命令解析。
+- **单项采集失败不影响整体返回**——容器里经常拿不到磁盘/主机信息，失败项保持零值即可，监控页不能因为一项挂了就全白屏。
+- `cpu.Percent(200ms)` 需要采样窗口，会阻塞 200ms——监控页手动刷新可以接受，别把它放进高频接口。
+
+> **面试常问**："大文件导出怎么优化？"（流式写 + 分批查询游标，避免一次性全表载入内存；超大数据走异步任务生成文件 + 通知下载）
+
+---
+
 ## 16. 本项目真实踩过的坑（重构实录）
 
 这些坑都在 git 历史里有据可查（`0e036bd`、`0e476c9`、`a66269c`、`7fcd713`），每个都是常见的真实教训：

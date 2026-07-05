@@ -97,6 +97,14 @@ CREATE TABLE IF NOT EXISTS nest_tool_generate_columns (
 		return err
 	}
 
+	if err := ensureNoticeTable(db); err != nil {
+		return err
+	}
+
+	if err := ensureUserImportExportMenu(db); err != nil {
+		return err
+	}
+
 	return ensureOnlineUserMenu(db)
 }
 
@@ -111,6 +119,68 @@ CREATE TABLE IF NOT EXISTS ai_system_role_dept (
   KEY idx_role_id (role_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='角色部门关联表(自定义数据权限)';
 `).Error
+}
+
+// ensureNoticeTable 创建通知公告表，幂等。
+func ensureNoticeTable(db *gorm.DB) error {
+	return db.Exec(`
+CREATE TABLE IF NOT EXISTS ai_system_notice (
+  id int unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+  title varchar(255) NOT NULL COMMENT '公告标题',
+  type smallint NOT NULL DEFAULT 2 COMMENT '类型 (1通知 2公告)',
+  content text NULL COMMENT '公告内容',
+  status smallint NOT NULL DEFAULT 1 COMMENT '状态 (1正常 2停用)',
+  remark varchar(255) NULL DEFAULT NULL COMMENT '备注',
+  created_by int NULL DEFAULT NULL COMMENT '创建者',
+  updated_by int NULL DEFAULT NULL COMMENT '更新者',
+  create_time datetime NULL DEFAULT NULL COMMENT '创建时间',
+  update_time datetime NULL DEFAULT NULL COMMENT '修改时间',
+  delete_time datetime NULL DEFAULT NULL COMMENT '删除时间',
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='通知公告表';
+`).Error
+}
+
+// ensureUserImportExportMenu 为老库补齐用户导入/导出按钮权限码，按 code 判重保证幂等。
+// 挂到"用户管理"菜单（route='permission/user'）下；找不到父菜单就跳过（权限码没有归属没意义）。
+func ensureUserImportExportMenu(db *gorm.DB) error {
+	var parent struct {
+		ID    int
+		Level *string
+	}
+	if err := db.Table("ai_system_menu").Select("id, level").
+		Where("route = ? AND type = 'M' AND delete_time IS NULL", "permission/user").
+		Order("id ASC").Limit(1).Scan(&parent).Error; err != nil {
+		return err
+	}
+	if parent.ID == 0 {
+		return nil
+	}
+	childLevel := "0," + strconv.Itoa(parent.ID)
+	if parent.Level != nil && *parent.Level != "" {
+		childLevel = *parent.Level + "," + strconv.Itoa(parent.ID)
+	}
+
+	buttons := []struct{ name, code string }{
+		{"用户导入", "system/user/import"},
+		{"用户导出", "system/user/export"},
+	}
+	for _, button := range buttons {
+		var count int64
+		if err := db.Table("ai_system_menu").Where("code = ?", button.code).Count(&count).Error; err != nil {
+			return err
+		}
+		if count > 0 {
+			continue
+		}
+		if err := db.Exec(`INSERT INTO ai_system_menu
+  (parent_id, level, name, code, is_hidden, is_layout, type, status, sort, remark, create_time, update_time)
+  VALUES (?, ?, ?, ?, 2, 1, 'B', 1, 0, '', NOW(), NOW())`,
+			parent.ID, childLevel, button.name, button.code).Error; err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // ensureOnlineUserMenu 为老库补齐"在线用户"菜单和按钮权限码，按 code 判重保证幂等。

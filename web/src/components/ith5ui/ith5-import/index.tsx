@@ -11,7 +11,7 @@ export interface Ith5ImportProps {
     /** import 配置，对应 defaultOptions.import */
     importOptions: {
         url?: string;
-        params?: Record<string, any>;
+        params?: Record<string, string>;
         templateUrl?: string;
     };
     /** 导入成功回调 */
@@ -49,11 +49,17 @@ const Ith5Import = forwardRef<Ith5ImportRef, Ith5ImportProps>(
 
             try {
                 const res = await request.uploadFile(importOptions.url!, formData);
-                if (res.code === 200) {
-                    message.success(res.message || '导入成功');
+                if (res.code === 0 || res.code === 200) {
+                    const counts = res.data as { success?: number; failed?: number } | undefined;
+                    if (counts?.success !== undefined) {
+                        const failedText = counts.failed ? `，失败 ${counts.failed} 条` : '';
+                        message.success(`导入成功 ${counts.success} 条${failedText}`);
+                    } else {
+                        message.success(res.message || '导入成功');
+                    }
+                    onSuccess?.();
+                    close();
                 }
-                onSuccess?.();
-                close();
             } catch {
                 // 错误已由 request 拦截器统一处理
             }
