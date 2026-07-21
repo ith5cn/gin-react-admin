@@ -1,7 +1,7 @@
 import { Layout } from 'antd'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { findMenuPathChain, HOME_PATH } from '@/routers/menuHelpers'
+import { findMenuPathChain } from '@/routers/menuHelpers'
 import { useAuthStore } from '@/store/auth'
 import type { AppMenuItem } from '@/types/router'
 import { Tags } from '../tags'
@@ -20,35 +20,26 @@ const findTopLevelMenuByPath = (items: AppMenuItem[], pathname: string) => {
   return items.find((item) => item.key === topLevelKey) ?? items[0] ?? null
 }
 
-const findFirstNavigablePath = (menuItem: AppMenuItem): string => {
-  if (menuItem.path && !menuItem.external) {
-    return menuItem.path
-  }
-
-  if (!menuItem.children?.length) {
-    return ''
-  }
-
-  for (const child of menuItem.children) {
-    const childPath = findFirstNavigablePath(child)
-
-    if (childPath) {
-      return childPath
-    }
-  }
-
-  return ''
+type TopMenuSelection = {
+  key: string
+  pathname: string
 }
 
 export const MixedLayout = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const sideMenuItems = useAuthStore((state) => state.sideMenuItems)
+  const [topMenuSelection, setTopMenuSelection] = useState<TopMenuSelection | null>(null)
 
-  const activeTopMenu = useMemo(
+  const routedTopMenu = useMemo(
     () => findTopLevelMenuByPath(sideMenuItems, location.pathname),
     [location.pathname, sideMenuItems],
   )
+  const selectedTopMenu =
+    topMenuSelection?.pathname === location.pathname
+      ? sideMenuItems.find((item) => item.key === topMenuSelection.key) ?? null
+      : null
+  const activeTopMenu = selectedTopMenu ?? routedTopMenu
 
   const handleTopMenuChange = (menuItem: AppMenuItem) => {
     if (menuItem.external) {
@@ -57,12 +48,7 @@ export const MixedLayout = () => {
     }
 
     if (menuItem.children?.length) {
-      const firstChildPath = findFirstNavigablePath(menuItem)
-
-      if (firstChildPath && location.pathname !== firstChildPath) {
-        navigate(firstChildPath)
-      }
-
+      setTopMenuSelection({ key: menuItem.key, pathname: location.pathname })
       return
     }
 
@@ -72,7 +58,7 @@ export const MixedLayout = () => {
   }
 
   const siderMenuItems = activeTopMenu?.children ?? []
-  const shouldShowSider = siderMenuItems.length > 0 && location.pathname !== HOME_PATH
+  const shouldShowSider = siderMenuItems.length > 0
 
   return (
     <Layout className="flex h-full min-h-0 flex-col bg-[#f4f7fb]">
