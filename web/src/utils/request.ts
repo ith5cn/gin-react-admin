@@ -14,6 +14,7 @@ export interface Result<T = any> {
 const SUCCESS_CODES = [0, 200]
 const LOGIN_REQUIRED_CODES = [401, 402, 40102]
 const ACCESS_TOKEN_EXPIRED_CODE = 40101
+const SYSTEM_NOT_INSTALLED_CODE = 50301
 
 type RetryRequestConfig = AxiosRequestConfig & {
   _retry?: boolean
@@ -34,6 +35,12 @@ const redirectToLogin = () => {
   // navigateTo 使用 React Router navigate（SPA 跳转，无全页刷新）。
   // 对于 Layout 外的路由（如 /install），Layout 不会自动接管，因此需要主动跳转。
   navigateTo('/login')
+}
+
+const redirectToInstall = () => {
+  if (window.location.pathname !== '/install') {
+    navigateTo('/install')
+  }
 }
 
 const updateTokenSession = (tokenPair: any) => {
@@ -130,6 +137,11 @@ instance.interceptors.response.use(
       return retryWithNewToken(response)
     }
 
+    if (code === SYSTEM_NOT_INSTALLED_CODE) {
+      redirectToInstall()
+      return Promise.reject(new Error(normalizeMessage(payload)))
+    }
+
     if (LOGIN_REQUIRED_CODES.includes(code) || response.status === 401) {
       redirectToLogin()
     }
@@ -143,6 +155,11 @@ instance.interceptors.response.use(
 
     if (code === ACCESS_TOKEN_EXPIRED_CODE && error.response) {
       return retryWithNewToken(error.response)
+    }
+
+    if (code === SYSTEM_NOT_INSTALLED_CODE) {
+      redirectToInstall()
+      return Promise.reject(error)
     }
 
     if (error.response?.status === 401 || LOGIN_REQUIRED_CODES.includes(code)) {

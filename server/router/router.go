@@ -62,6 +62,6 @@ func installGuard() gin.HandlerFunc {
 			c.Next()
 			return
 		}
-		response.FailWithAbort(c, http.StatusServiceUnavailable, code.SystemError, "系统尚未安装，请先访问 /install 完成初始化")
+		response.FailWithAbort(c, http.StatusServiceUnavailable, code.SystemNotInstalled)
 	}
 }

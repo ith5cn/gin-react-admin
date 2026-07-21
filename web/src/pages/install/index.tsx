@@ -3,6 +3,7 @@ import { Button, Checkbox, Form, Input, InputNumber, Result, Select, Steps, mess
 import { CheckCircle, Database, KeyRound, LoaderCircle, Server, ShieldCheck } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { installCheckApi, installRunApi, installStatusApi, type InstallPayload } from '@/api/install'
+import { useInstallBootstrap } from '@/routers/installBootstrapContext'
 
 const defaultValues: InstallPayload = {
   mysql: {
@@ -26,6 +27,7 @@ const defaultValues: InstallPayload = {
 const Install = () => {
   const [form] = Form.useForm<InstallPayload>()
   const navigate = useNavigate()
+  const { markInstalled } = useInstallBootstrap()
   const [current, setCurrent] = useState(0)
   const [loading, setLoading] = useState(true)
   const [checking, setChecking] = useState(false)
@@ -79,6 +81,7 @@ const Install = () => {
     setInstalling(true)
     try {
       await installRunApi(payload)
+      markInstalled()
       setInstalled(true)
       setCurrent(3)
       message.success('安装完成')

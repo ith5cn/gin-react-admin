@@ -11,6 +11,7 @@ const (
 	LoginRequired      = 40102 // 未登录或 token 无效，需要重新登录。
 	PermissionDenied   = 40301 // 已登录但没有该接口的权限码。
 	SystemError        = 50001 // 系统内部错误，细节只进服务端日志。
+	SystemNotInstalled = 50301 // 系统尚未安装，前端应跳转安装向导。
 )
 
 var messages = map[int]string{
@@ -21,6 +22,7 @@ var messages = map[int]string{
 	LoginRequired:      "please login again",
 	PermissionDenied:   "无权限执行该操作",
 	SystemError:        "系统异常",
+	SystemNotInstalled: "系统尚未安装，请先完成初始化",
 }
 
 // Message 返回业务码的默认文案，未登记的码统一返回"操作失败"。

@@ -5,6 +5,7 @@ import { BrowserRouter, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import RenderRoutes from '@/routers'
+import InstallBootstrap from '@/routers/InstallBootstrap'
 import useAppStore from '@/store/useAppStore'
 import { setNavigate } from '@/utils/navigateHelper'
 
@@ -43,7 +44,9 @@ function App() {
       </style>
       <BrowserRouter>
         <NavigateSetter />
-        <RenderRoutes />
+        <InstallBootstrap>
+          <RenderRoutes />
+        </InstallBootstrap>
       </BrowserRouter>
     </ConfigProvider>
   )
