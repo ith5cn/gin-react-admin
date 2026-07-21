@@ -11,7 +11,7 @@
  Target Server Version : 80407 (8.4.7)
  File Encoding         : 65001
 
- Date: 18/06/2026 19:28:13
+ Date: 21/07/2026 02:53:35
 */
 
 SET NAMES utf8mb4;
@@ -323,11 +323,27 @@ CREATE TABLE `ai_system_login_log`  (
   `delete_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `username`(`username` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 412 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '登录日志表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 428 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '登录日志表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ai_system_login_log
 -- ----------------------------
+INSERT INTO `ai_system_login_log` VALUES (412, 'admin', '::1', NULL, 'Windows', 'Chrome', 1, '登录成功', '2026-07-21 02:16:01', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `ai_system_login_log` VALUES (413, 'admin', '::1', NULL, 'Windows', 'Chrome', 1, '登录成功', '2026-07-21 02:38:09', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `ai_system_login_log` VALUES (414, 'admin', '127.0.0.1', NULL, 'Windows', 'Unknown', 1, '登录成功', '2026-07-21 02:44:08', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `ai_system_login_log` VALUES (415, 'admin', '127.0.0.1', NULL, 'Windows', 'Unknown', 1, '登录成功', '2026-07-21 02:44:16', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `ai_system_login_log` VALUES (416, 'admin', '127.0.0.1', NULL, 'Windows', 'Unknown', 1, '登录成功', '2026-07-21 02:44:45', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `ai_system_login_log` VALUES (417, 'admin', '127.0.0.1', NULL, 'Windows', 'Unknown', 1, '登录成功', '2026-07-21 02:44:53', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `ai_system_login_log` VALUES (418, 'admin', '127.0.0.1', NULL, 'Windows', 'Unknown', 1, '登录成功', '2026-07-21 02:48:10', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `ai_system_login_log` VALUES (419, 'admin', '127.0.0.1', NULL, 'Windows', 'Unknown', 1, '登录成功', '2026-07-21 02:48:20', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `ai_system_login_log` VALUES (420, 'admin', '127.0.0.1', NULL, 'Windows', 'Unknown', 1, '登录成功', '2026-07-21 02:48:46', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `ai_system_login_log` VALUES (421, 'admin', '127.0.0.1', NULL, 'Windows', 'Unknown', 1, '登录成功', '2026-07-21 02:49:07', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `ai_system_login_log` VALUES (422, 'admin', '127.0.0.1', NULL, 'Windows', 'Unknown', 1, '登录成功', '2026-07-21 02:49:24', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `ai_system_login_log` VALUES (423, 'admin', '127.0.0.1', NULL, 'Windows', 'Unknown', 1, '登录成功', '2026-07-21 02:49:24', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `ai_system_login_log` VALUES (424, 'admin', '127.0.0.1', NULL, 'Windows', 'Unknown', 1, '登录成功', '2026-07-21 02:49:50', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `ai_system_login_log` VALUES (425, 'admin', '127.0.0.1', NULL, 'Windows', 'Unknown', 1, '登录成功', '2026-07-21 02:50:00', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `ai_system_login_log` VALUES (426, 'admin', '127.0.0.1', NULL, 'Windows', 'Unknown', 1, '登录成功', '2026-07-21 02:51:25', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `ai_system_login_log` VALUES (427, 'admin', '127.0.0.1', NULL, 'Windows', 'Unknown', 1, '登录成功', '2026-07-21 02:51:39', NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for ai_system_menu
@@ -357,13 +373,13 @@ CREATE TABLE `ai_system_menu`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '修改时间',
   `delete_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6270 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '菜单信息表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 6271 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '菜单信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of ai_system_menu
 -- ----------------------------
-INSERT INTO `ai_system_menu` VALUES (1000, 0, '0', '权限', 'permission', 'IconSafe', 'permission', '', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (1100, 1000, '0,1000', '用户管理', 'permission/user', 'IconUserGroup', 'permission/user', 'system/user/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (1000, 5000, '0,5000', '权限管理', 'permission', 'SafetyCertificateOutlined', 'permission', '', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:51:25', NULL);
+INSERT INTO `ai_system_menu` VALUES (1100, 1000, '0,5000,1000', '用户管理', 'permission/user', 'TeamOutlined', 'permission/user', 'system/user/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:51:39', NULL);
 INSERT INTO `ai_system_menu` VALUES (1101, 1100, '0,1000,1100', '用户列表', 'system/user/index', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1102, 1100, '0,1000,1100', '用户保存', 'system/user/create', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1103, 1100, '0,1000,1100', '用户更新', 'system/user/update', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
@@ -375,27 +391,27 @@ INSERT INTO `ai_system_menu` VALUES (1108, 1100, '0,1000,1100', '更新用户缓
 INSERT INTO `ai_system_menu` VALUES (1109, 1100, '0,1000,1100', '设置用户首页', 'system/user/set-home-page', '', NULL, '', NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1110, 1100, '0,1000,1100', '用户导入', 'system/user/import', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2026-07-04 00:00:00', '2026-07-04 00:00:00', NULL);
 INSERT INTO `ai_system_menu` VALUES (1111, 1100, '0,1000,1100', '用户导出', 'system/user/export', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2026-07-04 00:00:00', '2026-07-04 00:00:00', NULL);
-INSERT INTO `ai_system_menu` VALUES (1200, 1000, '0,1000', '菜单管理', 'permission/menu', 'IconMenu', 'permission/menu', 'system/menu/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (1200, 1000, '0,5000,1000', '菜单管理', 'permission/menu', 'MenuOutlined', 'permission/menu', 'system/menu/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:51:39', NULL);
 INSERT INTO `ai_system_menu` VALUES (1201, 1200, '0,1000,1200', '菜单列表', 'system/menu/index', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1202, 1200, '0,1000,1200', '菜单保存', 'system/menu/create', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1203, 1200, '0,1000,1200', '菜单更新', 'system/menu/update', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1204, 1200, '0,1000,1200', '菜单删除', 'system/menu/destroy', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1205, 1200, '0,1000,1200', '菜单读取', 'system/menu/read', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (1300, 1000, '0,1000', '部门管理', 'permission/dept', 'IconMindMapping', 'permission/dept', 'system/dept/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (1300, 1000, '0,5000,1000', '部门管理', 'permission/dept', 'ApartmentOutlined', 'permission/dept', 'system/dept/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:51:39', NULL);
 INSERT INTO `ai_system_menu` VALUES (1301, 1300, '0,1000,1300', '部门列表', 'system/dept/index', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1302, 1300, '0,1000,1300', '部门保存', 'system/dept/create', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1303, 1300, '0,1000,1300', '部门更新', 'system/dept/update', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1304, 1300, '0,1000,1300', '部门删除', 'system/dept/destroy', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1305, 1300, '0,1000,1300', '部门读取', 'system/dept/read', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1306, 1300, '0,1000,1300', '部门领导', 'system/dept/leaders', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (1400, 1000, '0,1000', '角色管理', 'permission/role', 'IconLock', 'permission/role', 'system/role/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (1400, 1000, '0,5000,1000', '角色管理', 'permission/role', 'LockOutlined', 'permission/role', 'system/role/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:51:39', NULL);
 INSERT INTO `ai_system_menu` VALUES (1401, 1400, '0,1000,1400', '角色列表', 'system/role/index', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1402, 1400, '0,1000,1400', '角色保存', 'system/role/create', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1403, 1400, '0,1000,1400', '角色更新', 'system/role/update', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1404, 1400, '0,1000,1400', '角色删除', 'system/role/destroy', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1405, 1400, '0,1000,1400', '角色读取', 'system/role/read', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1406, 1400, '0,1000,1400', '角色菜单权限', 'system/role/menu-permission', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (1500, 1000, '0,1000', '岗位管理', 'permission/post', 'IconTags', 'permission/post', 'system/post/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (1500, 1000, '0,5000,1000', '岗位管理', 'permission/post', 'TagsOutlined', 'permission/post', 'system/post/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:51:39', NULL);
 INSERT INTO `ai_system_menu` VALUES (1501, 1500, '0,1000,1500', '岗位列表', 'system/post/index', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1502, 1500, '0,1000,1500', '岗位保存', 'system/post/create', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1503, 1500, '0,1000,1500', '岗位更新', 'system/post/update', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
@@ -404,18 +420,18 @@ INSERT INTO `ai_system_menu` VALUES (1505, 1500, '0,1000,1500', '岗位读取', 
 INSERT INTO `ai_system_menu` VALUES (1506, 1500, '0,1000,1500', '岗位状态改变', 'system/post/change-status', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1507, 1500, '0,1000,1500', '岗位导入', 'system/post/import', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (1508, 1500, '0,1000,1500', '岗位导出', 'system/post/export', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (2000, 0, '0', '数据', 'data', 'IconStorage', 'data', '', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (2100, 2000, '0,2000', '数据字典', 'data/dict', 'IconBook', 'data/dict', 'system/dict/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (2000, 0, '0', '数据', 'data', 'DatabaseOutlined', 'data', '', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:44:44', NULL);
+INSERT INTO `ai_system_menu` VALUES (2100, 2000, '0,2000', '数据字典', 'data/dict', 'BookOutlined', 'data/dict', 'system/dict/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:49:49', NULL);
 INSERT INTO `ai_system_menu` VALUES (2101, 2100, '0,2000,2100', '数据字典列表', 'system/dict-type/index', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (2102, 2100, '0,2000,2100', '数据字典保存', 'system/dict-type/create', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (2103, 2100, '0,2000,2100', '数据字典更新', 'system/dict-type/update', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (2104, 2100, '0,2000,2100', '数据字典删除', 'system/dict-type/destroy', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (2105, 2100, '0,2000,2100', '数据字典读取', 'system/dict-type/read', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (2106, 2100, '0,2000,2100', '字典状态改变', 'system/dict-type/change-status', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (2200, 2000, '0,2000', '附件管理', 'data/attachment', 'IconAttachment', 'data/attachment', 'system/attachment/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (2200, 2000, '0,2000', '附件管理', 'data/attachment', 'PaperClipOutlined', 'data/attachment', 'system/attachment/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:49:49', NULL);
 INSERT INTO `ai_system_menu` VALUES (2201, 2200, '0,2000,2200', '附件删除', 'system/attachment/destroy', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (2202, 2200, '0,2000,2200', '附件列表', 'system/attachment/index', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (2300, 2000, '0,2000', '数据表维护', 'data/database', 'IconNav', 'data/database', 'system/database/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (2300, 2000, '0,2000', '数据表维护', 'data/database', 'TableOutlined', 'data/database', 'system/database/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:49:49', NULL);
 INSERT INTO `ai_system_menu` VALUES (2301, 2300, '0,2000,2300', '数据表列表', 'system/database/index', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (2302, 2300, '0,2000,2300', '数据表详细', 'system/database/columns', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (2303, 2300, '0,2000,2300', '数据表清理碎片', 'system/database/fragment', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
@@ -423,33 +439,33 @@ INSERT INTO `ai_system_menu` VALUES (2304, 2300, '0,2000,2300', '数据表优化
 INSERT INTO `ai_system_menu` VALUES (2305, 2300, '0,2000,2300', '数据回收站', 'system/database/recycle', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (2306, 2300, '0,2000,2300', '数据销毁', 'system/database/destroy', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (2307, 2300, '0,2000,2300', '数据恢复', 'system/database/recover', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (2700, 2000, '0,2000', '系统公告', 'data/notice', 'IconNotification', 'data/notice', 'system/notice/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (2700, 2000, '0,2000', '系统公告', 'data/notice', 'NotificationOutlined', 'data/notice', 'system/notice/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:49:49', NULL);
 INSERT INTO `ai_system_menu` VALUES (2701, 2700, '0,2000,2700', '系统公告列表', 'system/notice/index', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (2702, 2700, '0,2000,2700', '系统公告保存', 'system/notice/create', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (2703, 2700, '0,2000,2700', '系统公告更新', 'system/notice/update', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (2704, 2700, '0,2000,2700', '系统公告删除', 'system/notice/destroy', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (2705, 2700, '0,2000,2700', '系统公告读取', 'system/notice/read', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (3000, 0, '0', '监控', 'monitor', 'IconComputer', 'monitor', '', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (3200, 3000, '0,3000', '服务监控', 'monitor/server', 'IconDashboard', 'monitor/server', 'system/monitor/server/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (3300, 3000, '0,3000', '日志监控', 'monitor/logs', 'IconRobot', 'monitor/logs', '', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (3400, 3300, '0,3000,3300', '登录日志', 'monitor/logs/loginLog', 'IconImport', 'monitor/logs/loginLog', 'system/logs/loginLog', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (3401, 3400, '0,3000,3300,3400', '登录日志列表', 'system/login-log/index', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (3402, 3400, '0,3000,3200,3300', '登录日志删除', 'system/login-log/destroy', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (3500, 3300, '0,3000,3300', '操作日志', 'monitor/logs/operLog', 'IconInfoCircle', 'monitor/logs/operLog', 'system/logs/operLog', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (3501, 3500, '0,3000,3300,3500', '操作日志列表', 'system/oper-log/index', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (3502, 3500, '0,3000,3200,3500', '操作日志删除', 'system/oper-log/destroy', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (3600, 3000, '0,3000', '邮件记录', 'monitor/emailLog', 'IconEmail', 'monitor/emailLog', 'system/logs/emailLog', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (3601, 3600, '0,3000,3600', '邮件记录删除', 'system/email/destroy', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (3602, 3600, '0,3000,3600', '邮件记录列表', 'system/email/index', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (3700, 3200, '0,3000,3200', '服务监控列表', 'system/monitor/index', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (3000, 0, '0', '监控', 'monitor', 'DesktopOutlined', 'monitor', '', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:44:44', NULL);
 INSERT INTO `ai_system_menu` VALUES (3100, 3000, '0,3000', '在线用户', 'monitor/online', 'TeamOutlined', 'monitor/online', 'system/monitor/online', NULL, 2, 1, 'M', 0, NULL, 1, 30, '', 1, 1, '2026-07-04 00:00:00', '2026-07-04 00:00:00', NULL);
 INSERT INTO `ai_system_menu` VALUES (3101, 3100, '0,3000,3100', '在线用户列表', 'system/online/index', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2026-07-04 00:00:00', '2026-07-04 00:00:00', NULL);
 INSERT INTO `ai_system_menu` VALUES (3102, 3100, '0,3000,3100', '在线用户强退', 'system/online/kick', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2026-07-04 00:00:00', '2026-07-04 00:00:00', NULL);
-INSERT INTO `ai_system_menu` VALUES (4000, 0, '0', '工具', 'tool', 'IconTool', 'tool', '', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (4100, 4000, '0,4000', '代码生成器', 'tool/code', 'IconCodeSquare', 'tool/code', 'system/gen-code/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-06-18 18:27:10', NULL);
+INSERT INTO `ai_system_menu` VALUES (3200, 3000, '0,3000', '服务监控', 'monitor/server', 'DashboardOutlined', 'monitor/server', 'system/monitor/server/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:49:49', NULL);
+INSERT INTO `ai_system_menu` VALUES (3300, 3000, '0,3000', '日志监控', 'monitor/logs', 'RobotOutlined', 'monitor/logs', '', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:49:49', NULL);
+INSERT INTO `ai_system_menu` VALUES (3400, 3300, '0,3000,3300', '登录日志', 'monitor/logs/loginLog', 'ImportOutlined', 'monitor/logs/loginLog', 'system/logs/loginLog', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:49:49', NULL);
+INSERT INTO `ai_system_menu` VALUES (3401, 3400, '0,3000,3300,3400', '登录日志列表', 'system/login-log/index', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (3402, 3400, '0,3000,3200,3300', '登录日志删除', 'system/login-log/destroy', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (3500, 3300, '0,3000,3300', '操作日志', 'monitor/logs/operLog', 'InfoCircleOutlined', 'monitor/logs/operLog', 'system/logs/operLog', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:49:49', NULL);
+INSERT INTO `ai_system_menu` VALUES (3501, 3500, '0,3000,3300,3500', '操作日志列表', 'system/oper-log/index', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (3502, 3500, '0,3000,3200,3500', '操作日志删除', 'system/oper-log/destroy', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (3600, 3000, '0,3000', '邮件记录', 'monitor/emailLog', 'MailOutlined', 'monitor/emailLog', 'system/logs/emailLog', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:49:49', NULL);
+INSERT INTO `ai_system_menu` VALUES (3601, 3600, '0,3000,3600', '邮件记录删除', 'system/email/destroy', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (3602, 3600, '0,3000,3600', '邮件记录列表', 'system/email/index', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (3700, 3200, '0,3000,3200', '服务监控列表', 'system/monitor/index', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (4000, 0, '0', '工具', 'tool', 'ToolOutlined', 'tool', '', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:44:44', NULL);
+INSERT INTO `ai_system_menu` VALUES (4100, 4000, '0,4000', '代码生成器', 'tool/code', 'CodeOutlined', 'tool/code', 'system/gen-code/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:49:49', NULL);
 INSERT INTO `ai_system_menu` VALUES (4101, 4100, '0,4000,4100', '代码生成列表', 'system/codegen/index', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (4102, 4100, '0,4000,4100', '功能操作', 'system/codegen/access', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (4200, 4000, '0,4000', '定时任务', 'tool/crontab', 'IconSchedule', 'tool/crontab', 'system/tool/crontab/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (4200, 4000, '0,4000', '定时任务', 'tool/crontab', 'ScheduleOutlined', 'tool/crontab', 'system/tool/crontab/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:49:49', NULL);
 INSERT INTO `ai_system_menu` VALUES (4201, 4200, '0,4000,4200', '定时任务列表', 'system/crontab/index', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (4202, 4200, '0,4000,4200', '定时任务保存', 'system/crontab/create', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (4203, 4200, '0,4000,4200', '定时任务更新', 'system/crontab/update', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
@@ -458,13 +474,13 @@ INSERT INTO `ai_system_menu` VALUES (4205, 4200, '0,4000,4200', '定时任务读
 INSERT INTO `ai_system_menu` VALUES (4206, 4200, '0,4000,4200', '定时任务状态修改', 'system/crontab/change-status', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (4207, 4200, '0,4000,4200', '定时任务执行', 'system/crontab/run', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (4208, 4200, '0,4000,4200', '定时任务日志删除', 'system/crontab/delete-log', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (4300, 4000, '0,4000', '插件安装', 'tool/install', 'IconUpload', 'tool/install', 'tool/install/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (5000, 0, '0', '系统设置', 'config', 'IconSettings', 'config', 'system/config/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (5001, 5000, '0,5000', '配置列表', 'system/config/index', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (5002, 5000, '0,5000', '新增配置 ', 'system/config/create', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (5003, 5000, '0,5000', '更新配置', 'system/config/update', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (5004, 5000, '0,5000', '删除配置', 'system/config/destroy', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (5100, 0, '0', '附加数据', 'addition', 'IconRelation', 'addition', '', NULL, 1, 1, 'M', 0, NULL, 2, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (4300, 4000, '0,4000', '插件安装', 'tool/install', 'UploadOutlined', 'tool/install', 'tool/install/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:49:49', NULL);
+INSERT INTO `ai_system_menu` VALUES (5000, 0, '0', '系统设置', 'config', 'SettingOutlined', 'config', '', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:44:44', NULL);
+INSERT INTO `ai_system_menu` VALUES (5001, 6270, '0,5000,6270', '配置列表', 'system/config/index', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:29:29', NULL);
+INSERT INTO `ai_system_menu` VALUES (5002, 6270, '0,5000,6270', '新增配置 ', 'system/config/create', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:29:40', NULL);
+INSERT INTO `ai_system_menu` VALUES (5003, 6270, '0,5000,6270', '更新配置', 'system/config/update', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:29:49', NULL);
+INSERT INTO `ai_system_menu` VALUES (5004, 6270, '0,5000,6270', '删除配置', 'system/config/destroy', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:29:58', NULL);
+INSERT INTO `ai_system_menu` VALUES (5100, 0, '0', '附加数据', 'addition', 'ApartmentOutlined', 'addition', '', NULL, 1, 1, 'M', 0, NULL, 2, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:44:44', NULL);
 INSERT INTO `ai_system_menu` VALUES (5101, 5100, '0,5100', '用户列表接口', 'system/user/auth-list', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (5102, 5100, '0,5100', '用户信息接口', 'system/user/info-by-ids', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (6001, 1102, NULL, 'CESHI1', '3333', '', '', 'dashboard/components/components/st-announced', NULL, 1, 1, 'M', 0, NULL, 1, 100, '', 1, 1, '2025-12-05 17:38:43', '2025-12-05 17:38:43', NULL);
@@ -476,6 +492,30 @@ INSERT INTO `ai_system_menu` VALUES (6266, 6265, NULL, '列表', 'system/ai-arti
 INSERT INTO `ai_system_menu` VALUES (6267, 6265, NULL, '新增', 'system/ai-article/create', '', '', '', NULL, 1, 1, 'B', 0, NULL, 1, 20, NULL, NULL, NULL, '2026-06-18 19:11:48', '2026-06-18 19:11:48', NULL);
 INSERT INTO `ai_system_menu` VALUES (6268, 6265, NULL, '编辑', 'system/ai-article/update', '', '', '', NULL, 1, 1, 'B', 0, NULL, 1, 30, NULL, NULL, NULL, '2026-06-18 19:11:48', '2026-06-18 19:11:48', NULL);
 INSERT INTO `ai_system_menu` VALUES (6269, 6265, NULL, '删除', 'system/ai-article/destroy', '', '', '', NULL, 1, 1, 'B', 0, NULL, 1, 40, NULL, NULL, NULL, '2026-06-18 19:11:48', '2026-06-18 19:11:48', NULL);
+INSERT INTO `ai_system_menu` VALUES (6270, 5000, '0,5000', '配置管理', 'setting', 'SettingOutlined', 'setting', 'system/config/index', NULL, 2, 1, 'M', 0, NULL, 1, 100, '', NULL, NULL, '2026-07-21 02:29:16', '2026-07-21 02:31:58', NULL);
+
+-- ----------------------------
+-- Table structure for ai_system_notice
+-- ----------------------------
+DROP TABLE IF EXISTS `ai_system_notice`;
+CREATE TABLE `ai_system_notice`  (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '公告标题',
+  `type` smallint NOT NULL DEFAULT 2 COMMENT '类型 (1通知 2公告)',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL COMMENT '公告内容',
+  `status` smallint NOT NULL DEFAULT 1 COMMENT '状态 (1正常 2停用)',
+  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '备注',
+  `created_by` int NULL DEFAULT NULL COMMENT '创建者',
+  `updated_by` int NULL DEFAULT NULL COMMENT '更新者',
+  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `update_time` datetime NULL DEFAULT NULL COMMENT '修改时间',
+  `delete_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '通知公告表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of ai_system_notice
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for ai_system_post
@@ -536,6 +576,22 @@ INSERT INTO `ai_system_role` VALUES (6, 0, '0', '附加数据接口', 'additionD
 INSERT INTO `ai_system_role` VALUES (7, 3, '', 'sdf', 'asdf', 1, 1, 100, '', 1, 1, '2025-12-12 16:59:48', '2025-12-12 16:59:48', NULL);
 
 -- ----------------------------
+-- Table structure for ai_system_role_dept
+-- ----------------------------
+DROP TABLE IF EXISTS `ai_system_role_dept`;
+CREATE TABLE `ai_system_role_dept`  (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `role_id` int UNSIGNED NOT NULL COMMENT '角色ID',
+  `dept_id` int UNSIGNED NOT NULL COMMENT '部门ID',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_role_id`(`role_id` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '角色部门关联表(自定义数据权限)' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of ai_system_role_dept
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for ai_system_role_menu
 -- ----------------------------
 DROP TABLE IF EXISTS `ai_system_role_menu`;
@@ -550,45 +606,6 @@ CREATE TABLE `ai_system_role_menu`  (
 
 -- ----------------------------
 -- Records of ai_system_role_menu
--- ----------------------------
-
--- ----------------------------
--- Table structure for ai_system_role_dept
--- ----------------------------
-DROP TABLE IF EXISTS `ai_system_role_dept`;
-CREATE TABLE `ai_system_role_dept`  (
-  `id` int UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `role_id` int UNSIGNED NOT NULL COMMENT '角色ID',
-  `dept_id` int UNSIGNED NOT NULL COMMENT '部门ID',
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_role_id`(`role_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '角色部门关联表(自定义数据权限)' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of ai_system_role_dept
--- ----------------------------
-
--- ----------------------------
--- Table structure for ai_system_notice
--- ----------------------------
-DROP TABLE IF EXISTS `ai_system_notice`;
-CREATE TABLE `ai_system_notice`  (
-  `id` int UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '公告标题',
-  `type` smallint NOT NULL DEFAULT 2 COMMENT '类型 (1通知 2公告)',
-  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL COMMENT '公告内容',
-  `status` smallint NOT NULL DEFAULT 1 COMMENT '状态 (1正常 2停用)',
-  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '备注',
-  `created_by` int NULL DEFAULT NULL COMMENT '创建者',
-  `updated_by` int NULL DEFAULT NULL COMMENT '更新者',
-  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
-  `update_time` datetime NULL DEFAULT NULL COMMENT '修改时间',
-  `delete_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '通知公告表' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of ai_system_notice
 -- ----------------------------
 
 -- ----------------------------
@@ -808,7 +825,7 @@ CREATE TABLE `nest_tool_generate_columns`  (
   `delete_time` datetime(6) NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_table_id`(`table_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 55 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '代码生成字段配置' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 55 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '代码生成字段配置' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of nest_tool_generate_columns
@@ -861,7 +878,7 @@ CREATE TABLE `nest_tool_generate_tables`  (
   `delete_time` datetime(6) NULL DEFAULT NULL COMMENT '删除时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_source_table`(`source` ASC, `table_name` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '代码生成表配置' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin COMMENT = '代码生成表配置' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of nest_tool_generate_tables
