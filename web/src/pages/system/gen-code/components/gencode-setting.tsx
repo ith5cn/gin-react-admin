@@ -54,17 +54,28 @@ const GencodeSetting = ({ form, menuTree }: GencodeSettingProps) => {
 
         <Row gutter={16}>
           <Col span={8}>
-            <Form.Item label="包名" name="package_name" rules={[{ required: true, message: "请输入包名" }]}>
+            <Form.Item
+              label="包名"
+              name="package_name"
+              extra="指定文件所在目录的二级目录名，如：system。"
+              rules={[
+                { required: true, message: "请输入包名" },
+                {
+                  pattern: /^[a-z][a-z0-9_]*$/,
+                  message: "包名只能由小写字母开头，并且只能包含小写字母、数字和下划线",
+                },
+              ]}
+            >
               <Input placeholder="请输入包名，如 system" />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item label="生成路径" name="generate_path" rules={[{ required: true, message: "请输入生成路径" }]}>
+            <Form.Item label="生成路径" name="generate_path" extra="前端根目录文件夹名称，必须与后端根目录同级。" rules={[{ required: true, message: "请输入生成路径" }]}>
               <Input placeholder="请输入前端项目目录，如 sdm.ith5.com" />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item label="模型类型" name="generate_model">
+            <Form.Item label="模型类型" name="generate_model" extra="根据不同选择生成不同的模型。">
               <Radio.Group>
                 <Radio value={1}>软删除</Radio>
                 <Radio value={2}>非软删除</Radio>
@@ -72,7 +83,7 @@ const GencodeSetting = ({ form, menuTree }: GencodeSettingProps) => {
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item label="所属菜单" name="belong_menu_id">
+            <Form.Item label="所属菜单" name="belong_menu_id" extra="不选择则为顶级菜单栏目。">
               <TreeSelect
                 treeData={menuTree}
                 allowClear
@@ -87,7 +98,7 @@ const GencodeSetting = ({ form, menuTree }: GencodeSettingProps) => {
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item label="表单样式" name="component_type">
+            <Form.Item label="表单样式" name="component_type" extra="设置新增和修改组件显示方式。">
               <Radio.Group optionType="button">
                 <Radio value={1}>模态框</Radio>
                 <Radio value={2}>抽屉</Radio>
@@ -95,7 +106,7 @@ const GencodeSetting = ({ form, menuTree }: GencodeSettingProps) => {
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item label="表单宽度" name="form_width">
+            <Form.Item label="表单宽度" name="form_width" extra="表单组件的宽度，单位为px。">
               <InputNumber style={{ width: "100%" }} />
             </Form.Item>
           </Col>

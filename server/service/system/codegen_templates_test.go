@@ -89,10 +89,10 @@ func fullViewTypeContext(generateModel int16, componentType int16, withDeleteTim
 		PackageName:        "system",
 		BusinessName:       "demo-article",
 		ClassName:          "DemoArticle",
-		BackendModelPath:   filepath.Join("model", "generated"),
-		BackendAPIPath:     filepath.Join("api", "generated"),
-		BackendRoutePath:   filepath.Join("router", "generated"),
-		BackendServicePath: filepath.Join("service", "generated"),
+		BackendModelPath:   filepath.Join("model", "system"),
+		BackendAPIPath:     filepath.Join("api", "system"),
+		BackendRoutePath:   filepath.Join("router", "system"),
+		BackendServicePath: filepath.Join("service", "system"),
 	}
 	ctx.BusinessApiName = toCamelCase(ctx.BusinessName)
 	ctx.EntityVarName = toCamelCase(ctx.ClassName)
@@ -168,7 +168,7 @@ func TestRenderGoModelNullableTypes(t *testing.T) {
 
 func TestRenderGoServiceSoftDelete(t *testing.T) {
 	soft := renderGoService(fullViewTypeContext(1, 1, true))
-	if !strings.Contains(soft, `systemService.SoftDeleteRecord("demo_article", id)`) {
+	if !strings.Contains(soft, `SoftDeleteRecord("demo_article", id)`) {
 		t.Fatalf("软删除表应使用 SoftDeleteRecord:\n%s", soft)
 	}
 	if !strings.Contains(soft, ", true)") {
@@ -176,7 +176,7 @@ func TestRenderGoServiceSoftDelete(t *testing.T) {
 	}
 
 	hard := renderGoService(fullViewTypeContext(2, 1, false))
-	if !strings.Contains(hard, "systemService.DeleteRecord(&generatedModel.DemoArticle{}, id)") {
+	if !strings.Contains(hard, "DeleteRecord(&generatedModel.DemoArticle{}, id)") {
 		t.Fatalf("非软删除表应使用 DeleteRecord:\n%s", hard)
 	}
 	if !strings.Contains(hard, ", false)") {
