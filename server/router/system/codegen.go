@@ -11,6 +11,8 @@ import (
 func codegenRoutes(system *gin.RouterGroup) {
 	system.GET("/codegen/index", middleware.Perm("system/codegen/index"), systemApi.CodegenList)
 	system.GET("/codegen/datasources", middleware.Perm("system/codegen/access"), systemApi.CodegenDatasources)
+	system.GET("/codegen/components", middleware.Perm("system/codegen/access"), systemApi.CodegenComponents)
+	system.GET("/codegen/option-routes", middleware.Perm("system/codegen/access"), systemApi.CodegenOptionRoutes)
 	system.GET("/codegen/db-tables", middleware.Perm("system/codegen/access"), systemApi.CodegenDBTables)
 	system.POST("/codegen/importTables", middleware.Perm("system/codegen/access"), systemApi.CodegenImportTables)
 	system.POST("/codegen/delete", middleware.Perm("system/codegen/access"), systemApi.CodegenDelete)

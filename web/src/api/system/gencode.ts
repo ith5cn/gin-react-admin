@@ -1,4 +1,4 @@
-﻿import request from "@/utils/request";
+import request from "@/utils/request";
 
 export const genCodeListApi = (params: any) => {
   return request.get("/system/codegen/index", { params });
@@ -35,3 +35,7 @@ export const genCodeGenerateApi = (id: number | string) => {
 export const genCodePreviewApi = (id: number | string) => {
   return request.get(`/system/codegen/preview/${id}`);
 };
+
+
+export const genCodeComponentsApi = () => request.get("/system/codegen/components");
+export const genCodeOptionRoutesApi = () => request.get("/system/codegen/option-routes");

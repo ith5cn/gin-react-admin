@@ -5,9 +5,10 @@ import useDictStore from "@/store/useDictStore";
 
 interface Ith5CheckboxProps extends Omit<CheckboxGroupProps, "options"> {
   dict: string;
+  valueType?: "string" | "number";
 }
 
-const Ith5Checkbox = ({ dict, ...rest }: Ith5CheckboxProps) => {
+const Ith5Checkbox = ({ dict, valueType = "string", ...rest }: Ith5CheckboxProps) => {
   const { dictMap, isLoaded, fetchDictAll } = useDictStore();
 
   useEffect(() => {
@@ -16,7 +17,7 @@ const Ith5Checkbox = ({ dict, ...rest }: Ith5CheckboxProps) => {
 
   const options = (dictMap[dict] ?? []).map((item) => ({
     label: item.label,
-    value: item.value,
+    value: valueType === "number" ? Number(item.value) : item.value,
   }));
 
   return <Checkbox.Group options={options} {...rest} />;

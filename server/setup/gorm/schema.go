@@ -38,7 +38,6 @@ CREATE TABLE IF NOT EXISTS nest_tool_generate_tables (
   generate_path varchar(100) NOT NULL DEFAULT 'web' COMMENT '生成路径',
   generate_model smallint NOT NULL DEFAULT 1 COMMENT '生成模式, 1 软删除 2 非软删除',
   form_width int NOT NULL DEFAULT 600 COMMENT '表单宽度',
-  is_full tinyint NOT NULL DEFAULT 1 COMMENT '是否全屏',
   remark varchar(255) NULL DEFAULT NULL COMMENT '备注',
   source varchar(255) NULL DEFAULT NULL COMMENT '数据源',
   component_type smallint NOT NULL DEFAULT 1 COMMENT '组件显示方式',
@@ -73,6 +72,8 @@ CREATE TABLE IF NOT EXISTS nest_tool_generate_columns (
   query_type varchar(100) NOT NULL DEFAULT 'eq' COMMENT '查询方式',
   view_type varchar(100) NOT NULL DEFAULT 'input' COMMENT '页面控件',
   dict_type varchar(200) NULL DEFAULT NULL COMMENT '字典类型',
+  option_source varchar(20) NULL DEFAULT NULL COMMENT '选项数据来源',
+  option_config text NULL COMMENT '选项组件配置',
   allow_roles varchar(255) NULL DEFAULT NULL COMMENT '允许查看该字段的角色',
   sort tinyint unsigned NOT NULL DEFAULT 0 COMMENT '排序',
   remark varchar(255) NULL DEFAULT NULL COMMENT '备注',
@@ -85,6 +86,12 @@ CREATE TABLE IF NOT EXISTS nest_tool_generate_columns (
 	}
 
 	if err := ensureCodegenSoftDeleteColumns(db); err != nil {
+		return err
+	}
+	if err := removeCodegenFullScreenColumns(db); err != nil {
+		return err
+	}
+	if err := ensureCodegenOptionColumns(db); err != nil {
 		return err
 	}
 
@@ -343,6 +350,35 @@ func ensureCodegenSoftDeleteColumns(db *gorm.DB) error {
 			if err := db.Exec("ALTER TABLE `" + table + "` ADD COLUMN `delete_time` datetime(6) NULL DEFAULT NULL COMMENT '删除时间'").Error; err != nil {
 				return err
 			}
+		}
+	}
+	return nil
+}
+
+// removeCodegenFullScreenColumns 清理已废弃的全屏配置列。
+func removeCodegenFullScreenColumns(db *gorm.DB) error {
+	tables := []string{"nest_tool_generate_tables", "ai_tool_generate_tables"}
+	for _, table := range tables {
+		if db.Migrator().HasTable(table) && db.Migrator().HasColumn(table, "is_full") {
+			if err := db.Migrator().DropColumn(table, "is_full"); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// ensureCodegenOptionColumns 为已有代码生成字段配置补齐组件数据源列。
+func ensureCodegenOptionColumns(db *gorm.DB) error {
+	const table = "nest_tool_generate_columns"
+	if !db.Migrator().HasColumn(table, "option_source") {
+		if err := db.Exec("ALTER TABLE `nest_tool_generate_columns` ADD COLUMN `option_source` varchar(20) NULL DEFAULT NULL COMMENT '选项数据来源' AFTER `dict_type`").Error; err != nil {
+			return err
+		}
+	}
+	if !db.Migrator().HasColumn(table, "option_config") {
+		if err := db.Exec("ALTER TABLE `nest_tool_generate_columns` ADD COLUMN `option_config` text NULL COMMENT '选项组件配置' AFTER `option_source`").Error; err != nil {
+			return err
 		}
 	}
 	return nil

@@ -1,14 +1,16 @@
-﻿import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
+import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { Button, Empty, Form, message, Modal, Tabs, Tag, type TabsProps } from "antd";
 import { dictTypeListApi } from "@/api/system/dict";
 import {
+  genCodeComponentsApi,
   genCodeDetailApi,
   genCodeGenerateApi,
+  genCodeOptionRoutesApi,
   genCodePreviewApi,
   genCodeUpdateApi,
 } from "@/api/system/gencode";
 import { menuListApi } from "@/api/system/menu";
-import GencodeColumns from "./gencode-columns";
+import GencodeColumns, { getColumnConfigError } from "./gencode-columns";
 import GencodeSetting from "./gencode-setting";
 
 export interface GencodeColumnRecord {
@@ -28,10 +30,39 @@ export interface GencodeColumnRecord {
   query_type: string;
   view_type: string;
   dict_type?: string;
+  option_source?: "static" | "route";
+  option_config?: string;
   sort: number;
   remark?: string;
 }
 
+export interface OptionNode {
+  label: string;
+  value: string | number | boolean;
+  children?: OptionNode[];
+}
+
+export interface OptionConfig {
+  options?: OptionNode[];
+  path?: string;
+  dataPath?: string;
+  labelField?: string;
+  valueField?: string;
+  childrenField?: string;
+  params?: Record<string, string | number | boolean>;
+}
+
+export interface ComponentCapability {
+  label: string;
+  value: string;
+  configType?: "dict" | "options";
+  queryDisabled?: boolean;
+}
+
+export interface OptionRoute {
+  label: string;
+  path: string;
+}
 export type GencodeTableRecord = {
   id: number;
   table_name?: string;
@@ -93,15 +124,19 @@ const GencodeModal = forwardRef<GencodeModalRef, GencodeModalProps>(({ onSuccess
   const [columns, setColumns] = useState<GencodeColumnRecord[]>([]);
   const [menuTree, setMenuTree] = useState<MenuTreeNode[]>([]);
   const [dictTypeOptions, setDictTypeOptions] = useState<Array<{ label: string; value: string }>>([]);
+  const [componentOptions, setComponentOptions] = useState<ComponentCapability[]>([]);
+  const [optionRoutes, setOptionRoutes] = useState<OptionRoute[]>([]);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewFiles, setPreviewFiles] = useState<PreviewFileRecord[]>([]);
   const [form] = Form.useForm();
 
   const loadDetail = async (id: number) => {
-    const [detailRes, menuRes, dictRes] = await Promise.all([
+    const [detailRes, menuRes, dictRes, componentRes, routeRes] = await Promise.all([
       genCodeDetailApi(id),
       menuListApi({}),
       dictTypeListApi({ page: 1, limit: 9999, status: 1 }),
+      genCodeComponentsApi(),
+      genCodeOptionRoutesApi(),
     ]);
 
     const detail = detailRes.data;
@@ -117,6 +152,8 @@ const GencodeModal = forwardRef<GencodeModalRef, GencodeModalProps>(({ onSuccess
         value: item.code,
       })),
     );
+    setComponentOptions((componentRes.data || []) as ComponentCapability[]);
+    setOptionRoutes((routeRes.data || []) as OptionRoute[]);
     setPreviewFiles([]);
     form.setFieldsValue({ ...detail.table });
   };
@@ -155,6 +192,11 @@ const GencodeModal = forwardRef<GencodeModalRef, GencodeModalProps>(({ onSuccess
 
   const handleSave = async () => {
     if (!currentId) return null;
+    const invalidColumn = columns.find((column) => getColumnConfigError(column, componentOptions));
+    if (invalidColumn) {
+      message.error(`${invalidColumn.column_comment || invalidColumn.column_name}: ${getColumnConfigError(invalidColumn, componentOptions)}`);
+      return null;
+    }
     setLoading(true);
     try {
       const table = await form.validateFields();
@@ -211,11 +253,13 @@ const GencodeModal = forwardRef<GencodeModalRef, GencodeModalProps>(({ onSuccess
             data={columns}
             onChange={setColumns}
             dictTypeOptions={dictTypeOptions}
+            componentOptions={componentOptions}
+            optionRoutes={optionRoutes}
           />
         ),
       },
     ],
-    [columns, dictTypeOptions, form, menuTree],
+    [columns, componentOptions, dictTypeOptions, form, menuTree, optionRoutes],
   );
 
   const previewItems = useMemo<TabsProps["items"]>(() => {

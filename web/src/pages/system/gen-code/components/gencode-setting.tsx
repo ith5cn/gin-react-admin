@@ -99,14 +99,6 @@ const GencodeSetting = ({ form, menuTree }: GencodeSettingProps) => {
               <InputNumber style={{ width: "100%" }} />
             </Form.Item>
           </Col>
-          <Col span={8}>
-            <Form.Item label="表单全屏" name="is_full">
-              <Radio.Group>
-                <Radio value={1}>是</Radio>
-                <Radio value={2}>否</Radio>
-              </Radio.Group>
-            </Form.Item>
-          </Col>
         </Row>
       </Form>
     </>

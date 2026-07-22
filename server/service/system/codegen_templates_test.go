@@ -32,6 +32,10 @@ func testCodegenColumn(name, columnType, viewType, queryType, dictType string, r
 	if dictType != "" {
 		column.DictType = ptrStr(dictType)
 	}
+	if viewType == "select" || viewType == "treeSelect" || viewType == "cascader" {
+		column.OptionSource = ptrStr(optionSourceStatic)
+		column.OptionConfig = ptrStr(`{"options":[{"label":"选项一","value":1,"children":[{"label":"子选项","value":2}]}]}`)
+	}
 	return column
 }
 
@@ -77,7 +81,6 @@ func fullViewTypeContext(generateModel int16, componentType int16, withDeleteTim
 		GenerateModel:  generateModel,
 		ComponentType:  componentType,
 		FormWidth:      800,
-		IsFull:         2,
 	}
 
 	ctx := codegenContext{
@@ -206,7 +209,7 @@ func TestRenderFrontendEditComponents(t *testing.T) {
 	content := renderFrontendEdit(fullViewTypeContext(1, 1, true))
 	for _, expect := range []string{
 		`<Input.Password`, `<Input.TextArea`, `<InputNumber`, `<Select mode="tags"`,
-		`<Switch />`, `<Slider />`, `<Ith5Select dict="status"`, `<TreeSelect`,
+		`<Switch />`, `<Slider />`, `<Select allowClear`, `<Ith5Select dict="status"`, `<TreeSelect`,
 		`<Ith5Radio dict="level"`, `<Ith5Checkbox dict="channel"`,
 		`<DatePicker showTime`, `<TimePicker`, `<Cascader`, `<AuthSelect />`,
 		`<CityLinkage />`, `<ImageUpload />`, `<FileUpload />`, `<WangEditor />`,
@@ -215,7 +218,7 @@ func TestRenderFrontendEditComponents(t *testing.T) {
 		`{ name: "publishTime", format: "YYYY-MM-DD HH:mm:ss" },`,
 		`{ name: "birthday", format: "YYYY-MM-DD" },`,
 		`{ name: "remindAt", format: "HH:mm:ss" },`,
-		`const ARRAY_FIELDS = ["tags", "channels", "city"];`,
+		`{ name: "channels", numeric: false },`,
 		`rules={[{ required: true, message: "请输入title描述" }]}`,
 		`getValueProps={(value) => ({ checked: value === 1 })}`,
 		"catch (error) {",
@@ -229,6 +232,19 @@ func TestRenderFrontendEditComponents(t *testing.T) {
 	}
 }
 
+func TestRenderFrontendEditPreservesPercentText(t *testing.T) {
+	ctx := fullViewTypeContext(1, 1, true)
+	ctx.FormColumns[0].ColumnComment = ptrStr("完成率 100%")
+	content := renderFrontendEdit(ctx)
+	if !strings.Contains(content, "完成率 100%") {
+		t.Fatalf("百分号文本未被完整保留:\n%s", content)
+	}
+	for _, invalid := range []string{"%!", "(string="} {
+		if strings.Contains(content, invalid) {
+			t.Fatalf("生成内容包含格式化异常 %q:\n%s", invalid, content)
+		}
+	}
+}
 func TestRenderFrontendEditDrawer(t *testing.T) {
 	content := renderFrontendEdit(fullViewTypeContext(1, 2, true))
 	for _, expect := range []string{"<Drawer", "onClose={close}", "width={800}"} {
@@ -278,6 +294,47 @@ func TestWriteFrontendSample(t *testing.T) {
 	for name, content := range files {
 		if err := os.WriteFile(filepath.Join(outDir, name), []byte(content), 0644); err != nil {
 			t.Fatal(err)
+		}
+	}
+}
+
+func TestRenderFrontendSearchComponents(t *testing.T) {
+	ctx := fullViewTypeContext(1, 1, true)
+	ctx.QueryColumns = nil
+	for _, column := range ctx.Columns {
+		switch column.ViewType {
+		case "select":
+			column.QueryType = "in"
+		case "treeSelect", "cascader", "saSelect", "userSelect", "cityLinkage":
+			column.QueryType = "eq"
+		case "date", "time", "inputNumber":
+			column.QueryType = "between"
+		default:
+			continue
+		}
+		ctx.QueryColumns = append(ctx.QueryColumns, column)
+	}
+	content := renderFrontendIndex(ctx)
+	for _, expect := range []string{
+		"<Select allowClear mode=\"multiple\" options=",
+		"<TreeSelect allowClear",
+		"<Cascader allowClear options=",
+		"<Ith5Select dict=\"status\" valueType=\"number\"",
+		"<DatePicker.RangePicker",
+		"<TimePicker.RangePicker",
+		"<QueryRange numeric />",
+		"<AuthSelect />",
+		"<CityLinkage />",
+		"const toSearchParams =",
+		".join(\",\")",
+	} {
+		if !strings.Contains(content, expect) {
+			t.Fatalf("search 模板缺少 %q:\n%s", expect, content)
+		}
+	}
+	for _, invalid := range []string{"options={[]}", "treeData={[]}", "%!", "(string="} {
+		if strings.Contains(content, invalid) {
+			t.Fatalf("search 模板包含非法占位 %q:\n%s", invalid, content)
 		}
 	}
 }

@@ -213,6 +213,9 @@ func CodegenUpdate(id string, payload map[string]interface{}) (map[string]interf
 		if nextColumns == nil {
 			nextColumns = currentColumns
 		}
+		if err := validateCodegenColumns(nextColumns); err != nil {
+			return err
+		}
 		if err := tx.Where("table_id = ?", id).Delete(&systemModel.ToolGenerateColumn{}).Error; err != nil {
 			return err
 		}
@@ -243,6 +246,9 @@ func CodegenPreview(id string) (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := validateCodegenColumns(ctx.Columns); err != nil {
+		return nil, err
+	}
 	files := append(buildGoPreviewFiles(ctx), buildFrontendPreviewFiles(ctx)...)
 	return map[string]interface{}{"files": files}, nil
 }
@@ -253,6 +259,9 @@ func CodegenPreview(id string) (map[string]interface{}, error) {
 func CodegenGenerate(id string) (map[string]interface{}, error) {
 	ctx, err := buildCodegenContext(id)
 	if err != nil {
+		return nil, err
+	}
+	if err := validateCodegenColumns(ctx.Columns); err != nil {
 		return nil, err
 	}
 	files := append(buildGoPreviewFiles(ctx), buildFrontendPreviewFiles(ctx)...)
@@ -358,7 +367,6 @@ FROM information_schema.columns WHERE table_schema = ? AND table_name = ? ORDER 
 		GeneratePath:   ptrString(defaultString(stringValue(existing.GeneratePath), "web")),
 		GenerateModel:  defaultInt16(existing.GenerateModel, 1),
 		FormWidth:      defaultInt(existing.FormWidth, 600),
-		IsFull:         defaultInt16(existing.IsFull, 1),
 		Source:         ptrString(source),
 		ComponentType:  defaultInt16(existing.ComponentType, 1),
 		Sort:           existing.Sort,
@@ -539,6 +547,8 @@ func columnsFromAny(value interface{}) []systemModel.ToolGenerateColumn {
 			QueryType:     defaultString(stringFromAny(m["query_type"]), "eq"),
 			ViewType:      defaultString(stringFromAny(m["view_type"]), "input"),
 			DictType:      optionalString(m["dict_type"]),
+			OptionSource:  optionalString(m["option_source"]),
+			OptionConfig:  optionalString(m["option_config"]),
 			AllowRoles:    optionalString(m["allow_roles"]),
 			Sort:          uint8(uintFromAny(m["sort"])),
 			Remark:        optionalString(m["remark"]),
@@ -548,7 +558,7 @@ func columnsFromAny(value interface{}) []systemModel.ToolGenerateColumn {
 }
 
 func codegenTableColumns() map[string]string {
-	return map[string]string{"table_comment": "table_comment", "package_name": "package_name", "business_name": "business_name", "class_name": "class_name", "menu_name": "menu_name", "belong_menu_id": "belong_menu_id", "generate_path": "generate_path", "generate_model": "generate_model", "component_type": "component_type", "sort": "sort", "form_width": "form_width", "is_full": "is_full", "remark": "remark"}
+	return map[string]string{"table_comment": "table_comment", "package_name": "package_name", "business_name": "business_name", "class_name": "class_name", "menu_name": "menu_name", "belong_menu_id": "belong_menu_id", "generate_path": "generate_path", "generate_model": "generate_model", "component_type": "component_type", "sort": "sort", "form_width": "form_width", "remark": "remark"}
 }
 
 // sourceOrDefault 数据源为空时回退到当前系统库。
@@ -576,7 +586,9 @@ func inferViewType(columnName, dataType string) string {
 	switch strings.ToLower(dataType) {
 	case "text", "tinytext", "mediumtext", "longtext":
 		return "textarea"
-	case "date", "datetime", "timestamp", "time", "year":
+	case "time":
+		return "time"
+	case "date", "datetime", "timestamp", "year":
 		return "date"
 	}
 	if strings.HasSuffix(columnName, "status") || strings.HasSuffix(columnName, "_type") {

@@ -71,3 +71,13 @@ func CodegenGenerate(c *gin.Context) {
 	result, err := systemService.CodegenGenerate(c.Param("id"))
 	successOrFail(c, result, err)
 }
+
+// CodegenComponents 返回代码生成器支持的页面组件能力。
+func CodegenComponents(c *gin.Context) {
+	successOrFail(c, systemService.CodegenComponentCapabilities(), nil)
+}
+
+// CodegenOptionRoutes 返回可作为组件数据源的系统 GET 路由。
+func CodegenOptionRoutes(c *gin.Context) {
+	successOrFail(c, systemService.CodegenOptionRoutes(), nil)
+}

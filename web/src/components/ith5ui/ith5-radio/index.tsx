@@ -5,9 +5,10 @@ import useDictStore from "@/store/useDictStore";
 
 interface Ith5RadioProps extends Omit<RadioGroupProps, "options"> {
   dict: string;
+  valueType?: "string" | "number";
 }
 
-const Ith5Radio = ({ dict, ...rest }: Ith5RadioProps) => {
+const Ith5Radio = ({ dict, valueType = "string", ...rest }: Ith5RadioProps) => {
   const { dictMap, isLoaded, fetchDictAll } = useDictStore();
 
   useEffect(() => {
@@ -16,7 +17,7 @@ const Ith5Radio = ({ dict, ...rest }: Ith5RadioProps) => {
 
   const options = (dictMap[dict] ?? []).map((item) => ({
     label: item.label,
-    value: item.value,
+    value: valueType === "number" ? Number(item.value) : item.value,
   }));
 
   return <Radio.Group options={options} {...rest} />;

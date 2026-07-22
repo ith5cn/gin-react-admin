@@ -1,6 +1,7 @@
 package system
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -9,6 +10,7 @@ import (
 	systemModel "server/model/system"
 	systemResponse "server/model/system/response"
 	"sort"
+	"strconv"
 	"strings"
 
 	"gorm.io/gorm"
@@ -203,34 +205,93 @@ func Register%sRoutes(group *gin.RouterGroup) {
 		ctx.RoutePath, ctx.RoutePath, ctx.ClassName)
 }
 
-// frontendSearchControl 生成搜索区控件：配了字典的用字典下拉，数字用数字输入框，其余文本框。
-func frontendSearchControl(column systemModel.ToolGenerateColumn, antdSet map[string]struct{}, customSet map[string]string) string {
+// frontendSearchControlFor 根据页面组件和查询操作符生成搜索控件。
+func frontendSearchControlFor(column systemModel.ToolGenerateColumn) frontendControl {
 	label := columnLabel(column)
-	dict := stringValue(column.DictType)
-	if dict != "" {
-		customSet["Ith5Select"] = "@/components/ith5ui/ith5-select"
-		return `<Ith5Select dict="` + dict + `" placeholder="请选择` + label + `" allowClear />`
+	base := strings.ToLower(stringValue(column.ColumnType))
+	multiple := column.QueryType == "in" || column.QueryType == "notin"
+	if column.QueryType == "between" {
+		switch column.ViewType {
+		case "date":
+			format := "YYYY-MM-DD"
+			picker, showTime := "", ""
+			if strings.HasPrefix(base, "year") {
+				format, picker = "YYYY", ` picker="year"`
+			}
+			if regexp.MustCompile(`^(datetime|timestamp)`).MatchString(base) {
+				format, showTime = "YYYY-MM-DD HH:mm:ss", " showTime"
+			}
+			return frontendControl{jsx: `<DatePicker.RangePicker` + picker + showTime + ` style={{ width: "100%" }} />`, antd: []string{"DatePicker"}, isArray: true, dateFormat: format}
+		case "time":
+			return frontendControl{jsx: `<TimePicker.RangePicker style={{ width: "100%" }} />`, antd: []string{"TimePicker"}, isArray: true, dateFormat: "HH:mm:ss"}
+		default:
+			return frontendControl{jsx: `<QueryRange` + map[bool]string{true: ` numeric`}[isNumericBaseType(base)] + ` />`, customs: []customImport{{"QueryRange", "@/components/query-range"}}, isArray: true}
+		}
 	}
-	if column.ViewType == "inputNumber" || isNumericBaseType(stringValue(column.ColumnType)) {
-		antdSet["InputNumber"] = struct{}{}
-		return `<InputNumber style={{ width: "100%" }} placeholder="请输入` + label + `" />`
+	if column.ViewType == "select" || column.ViewType == "treeSelect" || column.ViewType == "cascader" {
+		return frontendOptionControlFor(column, multiple)
 	}
-	antdSet["Input"] = struct{}{}
-	return `<Input placeholder="请输入` + label + `" allowClear />`
+	if column.ViewType == "saSelect" || column.ViewType == "radio" || column.ViewType == "checkbox" {
+		mode := ""
+		if multiple {
+			mode = ` mode="multiple"`
+		}
+		return frontendControl{jsx: `<Ith5Select dict="` + stringValue(column.DictType) + `"` + frontendValueTypeProp(column) + mode + ` placeholder="请选择` + label + `" />`, customs: []customImport{{"Ith5Select", "@/components/ith5ui/ith5-select"}}, isArray: multiple}
+	}
+	switch column.ViewType {
+	case "date":
+		format, picker, showTime := "YYYY-MM-DD", "", ""
+		if strings.HasPrefix(base, "year") {
+			format, picker = "YYYY", ` picker="year"`
+		}
+		if regexp.MustCompile(`^(datetime|timestamp)`).MatchString(base) {
+			format, showTime = "YYYY-MM-DD HH:mm:ss", " showTime"
+		}
+		return frontendControl{jsx: `<DatePicker` + picker + showTime + ` style={{ width: "100%" }} />`, antd: []string{"DatePicker"}, dateFormat: format}
+	case "time":
+		return frontendControl{jsx: `<TimePicker style={{ width: "100%" }} />`, antd: []string{"TimePicker"}, dateFormat: "HH:mm:ss"}
+	case "userSelect":
+		return frontendControl{jsx: `<AuthSelect />`, customs: []customImport{{"AuthSelect", "@/components/auth-select"}}}
+	case "cityLinkage":
+		return frontendControl{jsx: `<CityLinkage />`, customs: []customImport{{"CityLinkage", "@/components/city-linkage"}}, isArray: true}
+	case "inputTag":
+		return frontendControl{jsx: `<Select mode="tags" open={false} tokenSeparators={[","]} />`, antd: []string{"Select"}, isArray: true}
+	}
+	if multiple {
+		return frontendControl{jsx: `<Select mode="tags" open={false} tokenSeparators={[","]} placeholder="输入后回车添加` + label + `" />`, antd: []string{"Select"}, isArray: true}
+	}
+	if column.ViewType == "inputNumber" || isNumericBaseType(base) {
+		return frontendControl{jsx: `<InputNumber style={{ width: "100%" }} placeholder="请输入` + label + `" />`, antd: []string{"InputNumber"}}
+	}
+	return frontendControl{jsx: `<Input placeholder="请输入` + label + `" allowClear />`, antd: []string{"Input"}}
 }
 
 func renderFrontendIndex(ctx codegenContext) string {
 	antdSet := map[string]struct{}{"Col": {}, "Form": {}, "message": {}}
 	customSet := map[string]string{}
-
 	searchFields := make([]string, 0)
+	dateFields := make([]string, 0)
+	arrayFields := make([]string, 0)
 	for _, column := range ctx.QueryColumns {
-		control := frontendSearchControl(column, antdSet, customSet)
+		control := frontendSearchControlFor(column)
+		for _, item := range control.antd {
+			antdSet[item] = struct{}{}
+		}
+		for _, item := range control.customs {
+			customSet[item.name] = item.path
+		}
+		name := toCamelCase(column.ColumnName)
+		if control.dateFormat != "" {
+			dateFields = append(dateFields, fmt.Sprintf(`  { name: "%s", format: "%s" },`, name, control.dateFormat))
+		}
+		if control.isArray {
+			arrayFields = append(arrayFields, fmt.Sprintf("%q", name))
+		}
 		searchFields = append(searchFields, fmt.Sprintf(`            <Col span={6}>
               <Form.Item name="%s" label="%s">
                 %s
               </Form.Item>
-            </Col>`, toCamelCase(column.ColumnName), columnLabel(column), control))
+            </Col>`, name, columnLabel(column), control.jsx))
 	}
 
 	listColumns := make([]string, 0)
@@ -247,14 +308,23 @@ func renderFrontendIndex(ctx codegenContext) string {
 	for _, name := range sortedKeys(customSet) {
 		customImports += fmt.Sprintf("\nimport %s from \"%s\";", name, customSet[name])
 	}
+	transformBlock := buildFrontendSearchTransforms(dateFields, arrayFields)
+	dayjsImport := ""
+	apiExpression := ctx.BusinessApiName + "ListApi"
+	if len(dateFields) > 0 {
+		dayjsImport = "\nimport type { Dayjs } from \"dayjs\";"
+	}
+	if transformBlock != "" {
+		apiExpression = fmt.Sprintf("(params: Record<string, unknown>) => %sListApi(toSearchParams(params))", ctx.BusinessApiName)
+	}
 
 	return fmt.Sprintf(`// 本文件由代码生成器生成，重新生成会覆盖手工修改。
 import { useRef } from "react";
-import { %s } from "antd";
+import { %s } from "antd";%s
 import Ith5Table, { type TableRef } from "@/components/ith5ui/ith5-table";%s
 import { %sDeleteApi, %sListApi } from "@/api/%s/%s";
 import %sEdit, { type %sEditRef } from "./edit";
-
+%s
 const %sIndex = () => {
   const tableRef = useRef<TableRef>(null);
   const editRef = useRef<%sEditRef>(null);
@@ -269,7 +339,7 @@ const %sIndex = () => {
           </>
         }
         options={{
-          api: %sListApi,
+          api: %s,
           add: { show: true, auth: ["%s/create"], func: () => editRef.current?.open("add") },
           edit: { show: true, auth: ["%s/update"], func: (record: { id: number }) => editRef.current?.open("edit", record) },
           delete: {
@@ -292,7 +362,31 @@ const %sIndex = () => {
 };
 
 export default %sIndex;
-`, joinSortedKeys(antdSet), customImports, ctx.BusinessApiName, ctx.BusinessApiName, ctx.PackageName, ctx.BusinessName, ctx.ClassName, ctx.ClassName, ctx.ClassName, ctx.ClassName, strings.Join(searchFields, "\n"), ctx.BusinessApiName, ctx.RoutePath, ctx.RoutePath, ctx.RoutePath, ctx.BusinessApiName, strings.Join(listColumns, ",\n"), ctx.ClassName, ctx.ClassName)
+`, joinSortedKeys(antdSet), dayjsImport, customImports, ctx.BusinessApiName, ctx.BusinessApiName, ctx.PackageName, ctx.BusinessName, ctx.ClassName, ctx.ClassName, transformBlock, ctx.ClassName, ctx.ClassName, strings.Join(searchFields, "\n"), apiExpression, ctx.RoutePath, ctx.RoutePath, ctx.RoutePath, ctx.BusinessApiName, strings.Join(listColumns, ",\n"), ctx.ClassName, ctx.ClassName)
+}
+
+func buildFrontendSearchTransforms(dateFields, arrayFields []string) string {
+	if len(dateFields) == 0 && len(arrayFields) == 0 {
+		return ""
+	}
+	var out strings.Builder
+	if len(dateFields) > 0 {
+		out.WriteString("\nconst SEARCH_DATE_FIELDS: Array<{ name: string; format: string }> = [\n")
+		out.WriteString(strings.Join(dateFields, "\n"))
+		out.WriteString("\n];\n")
+	}
+	if len(arrayFields) > 0 {
+		out.WriteString("\nconst SEARCH_ARRAY_FIELDS = [" + strings.Join(arrayFields, ", ") + "];\n")
+	}
+	out.WriteString("\nconst toSearchParams = (values: Record<string, unknown>) => {\n  const next = { ...values };\n")
+	if len(dateFields) > 0 {
+		out.WriteString("  SEARCH_DATE_FIELDS.forEach(({ name, format }) => {\n    const value = next[name];\n    next[name] = Array.isArray(value)\n      ? value.map((item) => (item as Dayjs).format(format))\n      : value ? (value as Dayjs).format(format) : undefined;\n  });\n")
+	}
+	if len(arrayFields) > 0 {
+		out.WriteString("  SEARCH_ARRAY_FIELDS.forEach((name) => {\n    if (Array.isArray(next[name])) next[name] = next[name].filter((item) => item !== undefined && item !== \"\").join(\",\");\n  });\n")
+	}
+	out.WriteString("  return next;\n};\n")
+	return out.String()
 }
 
 // frontendControl 描述一个表单字段生成出的控件及其附带需求（导入、值转换等）。
@@ -312,6 +406,84 @@ type customImport struct {
 	path string
 }
 
+func frontendValueTypeProp(column systemModel.ToolGenerateColumn) string {
+	if isNumericBaseType(stringValue(column.ColumnType)) {
+		return ` valueType="number"`
+	}
+	return ""
+}
+
+func frontendOptionNodes(nodes []codegenOptionNode, valueType string) []codegenOptionNode {
+	result := make([]codegenOptionNode, 0, len(nodes))
+	for _, node := range nodes {
+		if valueType == "number" {
+			switch value := node.Value.(type) {
+			case string:
+				if parsed, err := strconv.ParseFloat(value, 64); err == nil {
+					node.Value = parsed
+				}
+			}
+		} else {
+			node.Value = fmt.Sprint(node.Value)
+		}
+		node.Children = frontendOptionNodes(node.Children, valueType)
+		result = append(result, node)
+	}
+	return result
+}
+
+func frontendOptionControlFor(column systemModel.ToolGenerateColumn, multiple bool) frontendControl {
+	config, _ := parseCodegenOptionConfig(column)
+	valueType := "string"
+	if isNumericBaseType(stringValue(column.ColumnType)) {
+		valueType = "number"
+	}
+	multipleProp := ""
+	if multiple {
+		multipleProp = ` mode="multiple"`
+	}
+	if stringValue(column.OptionSource) == optionSourceStatic {
+		options, _ := json.Marshal(frontendOptionNodes(config.Options, valueType))
+		switch column.ViewType {
+		case "treeSelect":
+			checkable := ""
+			if multiple {
+				checkable = " treeCheckable"
+			}
+			return frontendControl{jsx: `<TreeSelect allowClear` + checkable + ` treeData={` + string(options) + `} />`, antd: []string{"TreeSelect"}, verb: "请选择", isArray: multiple}
+		case "cascader":
+			multipleAttribute := ""
+			if multiple {
+				multipleAttribute = " multiple"
+			}
+			return frontendControl{jsx: `<Cascader allowClear` + multipleAttribute + ` options={` + string(options) + `} />`, antd: []string{"Cascader"}, verb: "请选择", isArray: true}
+		default:
+			return frontendControl{jsx: `<Select allowClear` + multipleProp + ` options={` + string(options) + `} />`, antd: []string{"Select"}, verb: "请选择", isArray: multiple}
+		}
+	}
+	params := []byte("{}")
+	if config.Params != nil {
+		params, _ = json.Marshal(config.Params)
+	}
+	props := fmt.Sprintf(` url=%q dataPath=%q labelField=%q valueField=%q childrenField=%q params={%s} valueType=%q`, config.Path, config.DataPath, defaultString(config.LabelField, "label"), defaultString(config.ValueField, "value"), defaultString(config.ChildrenField, "children"), string(params), valueType)
+	switch column.ViewType {
+	case "treeSelect":
+		checkable := ""
+		if multiple {
+			checkable = " treeCheckable"
+		}
+		return frontendControl{jsx: `<RemoteTreeSelect` + props + checkable + ` />`, customs: []customImport{{"RemoteTreeSelect", "@/components/remote-tree-select"}}, verb: "请选择", isArray: multiple}
+	case "cascader":
+		multipleAttribute := ""
+		if multiple {
+			multipleAttribute = " multiple"
+		}
+		return frontendControl{jsx: `<RemoteCascader` + props + multipleAttribute + ` />`, customs: []customImport{{"RemoteCascader", "@/components/remote-cascader"}}, verb: "请选择", isArray: true}
+	default:
+		return frontendControl{jsx: `<RemoteSelect` + props + multipleProp + ` />`, customs: []customImport{{"RemoteSelect", "@/components/remote-select"}}, verb: "请选择", isArray: multiple}
+	}
+}
+
 // frontendControlFor 把 view_type 映射为生成的 antd/业务控件。
 func frontendControlFor(column systemModel.ToolGenerateColumn) frontendControl {
 	label := columnLabel(column)
@@ -328,42 +500,27 @@ func frontendControlFor(column systemModel.ToolGenerateColumn) frontendControl {
 	case "inputTag":
 		return frontendControl{jsx: `<Select mode="tags" open={false} tokenSeparators={[","]} placeholder="输入后回车添加` + label + `" />`, antd: []string{"Select"}, verb: "请输入", isArray: true}
 	case "switch":
-		return frontendControl{
-			jsx:       `<Switch />`,
-			itemExtra: ` getValueProps={(value) => ({ checked: value === 1 })} normalize={(value) => (value ? 1 : 2)}`,
-			antd:      []string{"Switch"},
-			verb:      "请选择",
-		}
+		return frontendControl{jsx: `<Switch />`, itemExtra: ` getValueProps={(value) => ({ checked: value === 1 })} normalize={(value) => (value ? 1 : 2)}`, antd: []string{"Switch"}, verb: "请选择"}
 	case "slider":
 		return frontendControl{jsx: `<Slider />`, antd: []string{"Slider"}, verb: "请选择"}
-	case "select":
-		return frontendControl{jsx: `<Select allowClear placeholder="请选择` + label + `" options={[]} />`, antd: []string{"Select"}, comment: label + " 的数据来源需按业务补充", verb: "请选择"}
+	case "select", "treeSelect", "cascader":
+		return frontendOptionControlFor(column, false)
 	case "saSelect":
-		if dict != "" {
-			return frontendControl{jsx: `<Ith5Select dict="` + dict + `" placeholder="请选择` + label + `" />`, customs: []customImport{{"Ith5Select", "@/components/ith5ui/ith5-select"}}, verb: "请选择"}
-		}
-		return frontendControl{jsx: `<Select allowClear placeholder="请选择` + label + `" options={[]} />`, antd: []string{"Select"}, comment: label + " 未配置数据字典，选项需按业务补充", verb: "请选择"}
-	case "treeSelect":
-		return frontendControl{jsx: `<TreeSelect allowClear placeholder="请选择` + label + `" treeData={[]} />`, antd: []string{"TreeSelect"}, comment: label + " 的树形数据来源需按业务补充", verb: "请选择"}
+		return frontendControl{jsx: `<Ith5Select dict="` + dict + `"` + frontendValueTypeProp(column) + ` placeholder="请选择` + label + `" />`, customs: []customImport{{"Ith5Select", "@/components/ith5ui/ith5-select"}}, verb: "请选择"}
 	case "radio":
-		if dict != "" {
-			return frontendControl{jsx: `<Ith5Radio dict="` + dict + `" />`, customs: []customImport{{"Ith5Radio", "@/components/ith5ui/ith5-radio"}}, verb: "请选择"}
-		}
-		return frontendControl{jsx: `<Radio.Group options={[]} />`, antd: []string{"Radio"}, comment: label + " 未配置数据字典，选项需按业务补充", verb: "请选择"}
+		return frontendControl{jsx: `<Ith5Radio dict="` + dict + `"` + frontendValueTypeProp(column) + ` />`, customs: []customImport{{"Ith5Radio", "@/components/ith5ui/ith5-radio"}}, verb: "请选择"}
 	case "checkbox":
-		if dict != "" {
-			return frontendControl{jsx: `<Ith5Checkbox dict="` + dict + `" />`, customs: []customImport{{"Ith5Checkbox", "@/components/ith5ui/ith5-checkbox"}}, verb: "请选择", isArray: true}
-		}
-		return frontendControl{jsx: `<Checkbox.Group options={[]} />`, antd: []string{"Checkbox"}, comment: label + " 未配置数据字典，选项需按业务补充", verb: "请选择", isArray: true}
+		return frontendControl{jsx: `<Ith5Checkbox dict="` + dict + `"` + frontendValueTypeProp(column) + ` />`, customs: []customImport{{"Ith5Checkbox", "@/components/ith5ui/ith5-checkbox"}}, verb: "请选择", isArray: true}
 	case "date":
+		if strings.HasPrefix(base, "year") {
+			return frontendControl{jsx: `<DatePicker picker="year" style={{ width: "100%" }} placeholder="请选择` + label + `" />`, antd: []string{"DatePicker"}, verb: "请选择", dateFormat: "YYYY"}
+		}
 		if regexp.MustCompile(`^(datetime|timestamp)`).MatchString(base) {
 			return frontendControl{jsx: `<DatePicker showTime style={{ width: "100%" }} placeholder="请选择` + label + `" />`, antd: []string{"DatePicker"}, verb: "请选择", dateFormat: "YYYY-MM-DD HH:mm:ss"}
 		}
 		return frontendControl{jsx: `<DatePicker style={{ width: "100%" }} placeholder="请选择` + label + `" />`, antd: []string{"DatePicker"}, verb: "请选择", dateFormat: "YYYY-MM-DD"}
 	case "time":
 		return frontendControl{jsx: `<TimePicker style={{ width: "100%" }} placeholder="请选择` + label + `" />`, antd: []string{"TimePicker"}, verb: "请选择", dateFormat: "HH:mm:ss"}
-	case "cascader":
-		return frontendControl{jsx: `<Cascader allowClear placeholder="请选择` + label + `" options={[]} />`, antd: []string{"Cascader"}, comment: label + " 的级联数据来源需按业务补充", verb: "请选择"}
 	case "userSelect":
 		return frontendControl{jsx: `<AuthSelect />`, customs: []customImport{{"AuthSelect", "@/components/auth-select"}}, verb: "请选择"}
 	case "cityLinkage":
@@ -381,7 +538,6 @@ func frontendControlFor(column systemModel.ToolGenerateColumn) frontendControl {
 		return frontendControl{jsx: `<Input placeholder="请输入` + label + `" />`, antd: []string{"Input"}, verb: "请输入"}
 	}
 }
-
 func renderFrontendEdit(ctx codegenContext) string {
 	initialFields := make([]string, 0)
 	formItems := make([]string, 0)
@@ -408,7 +564,7 @@ func renderFrontendEdit(ctx codegenContext) string {
 			dateFields = append(dateFields, fmt.Sprintf(`  { name: "%s", format: "%s" },`, name, control.dateFormat))
 		}
 		if control.isArray {
-			arrayFields = append(arrayFields, fmt.Sprintf("%q", name))
+			arrayFields = append(arrayFields, fmt.Sprintf(`  { name: "%s", numeric: %t },`, name, isNumericBaseType(stringValue(column.ColumnType))))
 		}
 		initialFields = append(initialFields, fmt.Sprintf("  %s: %s,", name, frontendInitialValue(column, control)))
 
@@ -426,7 +582,7 @@ func renderFrontendEdit(ctx codegenContext) string {
 		formItems = append(formItems, item)
 	}
 
-	shell := frontendEditShell(ctx, antdSet)
+	shell := frontendEditShell(ctx, antdSet, strings.Join(formItems, "\n"))
 	needsTransform := len(dateFields) > 0 || len(arrayFields) > 0
 
 	imports := fmt.Sprintf("import { %s } from \"antd\";", joinSortedKeys(antdSet))
@@ -510,21 +666,17 @@ const %sEdit = forwardRef<%sEditRef, %sEditProps>(({ onSuccess }, ref) => {
 %sEdit.displayName = "%sEdit";
 
 export default %sEdit;
-`, imports, ctx.BusinessApiName, ctx.BusinessApiName, ctx.PackageName, ctx.BusinessName, ctx.ClassName, ctx.ClassName, strings.Join(initialFields, "\n"), transformBlock, ctx.ClassName, ctx.ClassName, ctx.ClassName, defaultString(stringValue(ctx.Table.MenuName), ctx.ClassName), openValues, submitPrelude, ctx.BusinessApiName, submitPayload, ctx.BusinessApiName, submitPayload, fmt.Sprintf(shell, strings.Join(formItems, "\n")), ctx.ClassName, ctx.ClassName, ctx.ClassName)
+`, imports, ctx.BusinessApiName, ctx.BusinessApiName, ctx.PackageName, ctx.BusinessName, ctx.ClassName, ctx.ClassName, strings.Join(initialFields, "\n"), transformBlock, ctx.ClassName, ctx.ClassName, ctx.ClassName, defaultString(stringValue(ctx.Table.MenuName), ctx.ClassName), openValues, submitPrelude, ctx.BusinessApiName, submitPayload, ctx.BusinessApiName, submitPayload, shell, ctx.ClassName, ctx.ClassName, ctx.ClassName)
 }
 
-// frontendEditShell 根据表单样式配置生成 Modal 或 Drawer 外壳；
-// 返回值是带一个 %%s 占位（表单项列表）的模板片段。
-func frontendEditShell(ctx codegenContext, antdSet map[string]struct{}) string {
+// frontendEditShell 根据表单样式配置生成 Modal 或 Drawer 外壳。
+func frontendEditShell(ctx codegenContext, antdSet map[string]struct{}, formItems string) string {
 	width := fmt.Sprintf("{%d}", defaultInt(ctx.Table.FormWidth, 720))
-	if ctx.Table.IsFull == 1 {
-		width = `"100%"`
-	}
 	formBody := `      <Form form={form} labelCol={{ span: 4 }} wrapperCol={{ span: 18 }}>
         <Form.Item name="id" hidden>
           <Input />
         </Form.Item>
-%s
+` + formItems + `
       </Form>`
 
 	if ctx.Table.ComponentType == 2 {
@@ -565,7 +717,9 @@ func buildFrontendTransforms(dateFields, arrayFields []string) string {
 		out.WriteString("\n];\n\n")
 	}
 	if len(arrayFields) > 0 {
-		out.WriteString("const ARRAY_FIELDS = [" + strings.Join(arrayFields, ", ") + "];\n\n")
+		out.WriteString("const ARRAY_FIELDS: Array<{ name: string; numeric: boolean }> = [\n")
+		out.WriteString(strings.Join(arrayFields, "\n"))
+		out.WriteString("\n];\n\n")
 	}
 
 	out.WriteString("const toFormValues = (data: Record<string, unknown>) => {\n")
@@ -574,7 +728,7 @@ func buildFrontendTransforms(dateFields, arrayFields []string) string {
 		out.WriteString("  DATE_FIELDS.forEach(({ name }) => {\n    next[name] = next[name] ? dayjs(String(next[name])) : undefined;\n  });\n")
 	}
 	if len(arrayFields) > 0 {
-		out.WriteString("  ARRAY_FIELDS.forEach((name) => {\n    if (typeof next[name] === \"string\") {\n      next[name] = next[name] === \"\" ? [] : String(next[name]).split(\",\");\n    }\n  });\n")
+		out.WriteString("  ARRAY_FIELDS.forEach(({ name, numeric }) => {\n    if (typeof next[name] === \"string\") {\n      const items = next[name] === \"\" ? [] : String(next[name]).split(\",\");\n      next[name] = numeric ? items.map(Number) : items;\n    }\n  });\n")
 	}
 	out.WriteString("  return next;\n};\n\n")
 
@@ -584,7 +738,7 @@ func buildFrontendTransforms(dateFields, arrayFields []string) string {
 		out.WriteString("  DATE_FIELDS.forEach(({ name, format }) => {\n    next[name] = next[name] ? (next[name] as Dayjs).format(format) : undefined;\n  });\n")
 	}
 	if len(arrayFields) > 0 {
-		out.WriteString("  ARRAY_FIELDS.forEach((name) => {\n    if (Array.isArray(next[name])) {\n      next[name] = (next[name] as string[]).join(\",\");\n    }\n  });\n")
+		out.WriteString("  ARRAY_FIELDS.forEach(({ name }) => {\n    if (Array.isArray(next[name])) {\n      next[name] = (next[name] as Array<string | number>).join(\",\");\n    }\n  });\n")
 	}
 	out.WriteString("  return next;\n};\n")
 	return out.String()

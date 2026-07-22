@@ -53,6 +53,14 @@ func NewRouter() *gin.Engine {
 		registerGroups("/api")
 	}
 
+	routePaths := make([]string, 0)
+	for _, route := range Router.Routes() {
+		if route.Method == http.MethodGet {
+			routePaths = append(routePaths, route.Path)
+		}
+	}
+	systemService.SetCodegenOptionRoutePaths(routePaths)
+
 	return Router
 }
 

@@ -21,7 +21,6 @@ type ToolGenerateTable struct {
 	GeneratePath   *string    `json:"generate_path" gorm:"column:generate_path"`
 	GenerateModel  int16      `json:"generate_model" gorm:"column:generate_model"`
 	FormWidth      int        `json:"form_width" gorm:"column:form_width"`
-	IsFull         int16      `json:"is_full" gorm:"column:is_full"`
 	Remark         *string    `json:"remark" gorm:"column:remark"`
 	Source         *string    `json:"source" gorm:"column:source"`
 	ComponentType  int16      `json:"component_type" gorm:"column:component_type"`
@@ -56,6 +55,8 @@ type ToolGenerateColumn struct {
 	QueryType     string     `json:"query_type" gorm:"column:query_type"`
 	ViewType      string     `json:"view_type" gorm:"column:view_type"`
 	DictType      *string    `json:"dict_type" gorm:"column:dict_type"`
+	OptionSource  *string    `json:"option_source" gorm:"column:option_source"`
+	OptionConfig  *string    `json:"option_config" gorm:"column:option_config"`
 	AllowRoles    *string    `json:"allow_roles" gorm:"column:allow_roles"`
 	Sort          uint8      `json:"sort" gorm:"column:sort"`
 	Remark        *string    `json:"remark" gorm:"column:remark"`
