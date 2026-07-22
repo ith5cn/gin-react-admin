@@ -314,7 +314,7 @@ CREATE TABLE `ai_system_login_log`  (
   `browser` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '浏览器',
   `status` smallint NULL DEFAULT 1 COMMENT '登录状态 (1成功 2失败)',
   `message` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '提示消息',
-  `login_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '登录时间',
+  `login_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登录时间',
   `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '备注',
   `created_by` int NULL DEFAULT NULL COMMENT '创建者',
   `updated_by` int NULL DEFAULT NULL COMMENT '更新者',
@@ -451,9 +451,9 @@ INSERT INTO `ai_system_menu` VALUES (3101, 3100, '0,3000,3100', '在线用户列
 INSERT INTO `ai_system_menu` VALUES (3102, 3100, '0,3000,3100', '在线用户强退', 'system/online/kick', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2026-07-04 00:00:00', '2026-07-04 00:00:00', NULL);
 INSERT INTO `ai_system_menu` VALUES (3200, 3000, '0,3000', '服务监控', 'monitor/server', 'DashboardOutlined', 'monitor/server', 'system/monitor/server/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:49:49', NULL);
 INSERT INTO `ai_system_menu` VALUES (3300, 3000, '0,3000', '日志监控', 'monitor/logs', 'RobotOutlined', 'monitor/logs', '', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:49:49', NULL);
-INSERT INTO `ai_system_menu` VALUES (3400, 3300, '0,3000,3300', '登录日志', 'monitor/logs/loginLog', 'ImportOutlined', 'monitor/logs/loginLog', 'system/logs/loginLog', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:49:49', NULL);
+INSERT INTO `ai_system_menu` VALUES (3400, 3300, '0,3000,3300', '登录日志', 'monitor/logs/loginLog', 'ImportOutlined', 'monitor/logs/loginLog', 'system/login-log/index', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:49:49', NULL);
 INSERT INTO `ai_system_menu` VALUES (3401, 3400, '0,3000,3300,3400', '登录日志列表', 'system/login-log/index', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
-INSERT INTO `ai_system_menu` VALUES (3402, 3400, '0,3000,3200,3300', '登录日志删除', 'system/login-log/destroy', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
+INSERT INTO `ai_system_menu` VALUES (3402, 3400, '0,3000,3300,3400', '登录日志删除', 'system/login-log/destroy', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (3500, 3300, '0,3000,3300', '操作日志', 'monitor/logs/operLog', 'InfoCircleOutlined', 'monitor/logs/operLog', 'system/logs/operLog', NULL, 2, 1, 'M', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2026-07-21 02:49:49', NULL);
 INSERT INTO `ai_system_menu` VALUES (3501, 3500, '0,3000,3300,3500', '操作日志列表', 'system/oper-log/index', '', '', '', NULL, 2, 1, 'B', 0, NULL, 1, 0, '', 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);
 INSERT INTO `ai_system_menu` VALUES (3502, 3500, '0,3000,3200,3500', '操作日志删除', 'system/oper-log/destroy', NULL, NULL, NULL, NULL, 2, 1, 'B', 0, NULL, 1, 0, NULL, 1, 1, '2025-04-30 13:56:46', '2025-04-30 13:56:46', NULL);

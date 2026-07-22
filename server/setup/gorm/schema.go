@@ -2,6 +2,7 @@ package gormInit
 
 import (
 	"strconv"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -17,6 +18,10 @@ func ensureAISystemSchema(db *gorm.DB) error {
 	}
 
 	if err := ensurePermissionCodes(db); err != nil {
+		return err
+	}
+
+	if err := ensureLoginLogSchema(db); err != nil {
 		return err
 	}
 
@@ -113,6 +118,28 @@ CREATE TABLE IF NOT EXISTS nest_tool_generate_columns (
 	}
 
 	return ensureOnlineUserMenu(db)
+}
+
+// ensureLoginLogSchema 修正旧版登录日志时间字段和菜单路径。
+func ensureLoginLogSchema(db *gorm.DB) error {
+	if db.Migrator().HasTable("ai_system_login_log") {
+		var extra string
+		if err := db.Raw("SELECT EXTRA FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?", "ai_system_login_log", "login_time").Scan(&extra).Error; err != nil {
+			return err
+		}
+		if strings.Contains(strings.ToLower(extra), "on update") {
+			if err := db.Exec("ALTER TABLE ai_system_login_log MODIFY COLUMN login_time datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登录时间'").Error; err != nil {
+				return err
+			}
+		}
+		if err := db.Exec("UPDATE ai_system_login_log SET ip_location = '本机' WHERE (ip_location IS NULL OR ip_location = '') AND ip IN ('127.0.0.1', '::1')").Error; err != nil {
+			return err
+		}
+	}
+	if err := db.Exec("UPDATE ai_system_menu SET component = 'system/login-log/index' WHERE component = 'system/logs/loginLog'").Error; err != nil {
+		return err
+	}
+	return db.Exec("UPDATE ai_system_menu SET level = '0,3000,3300,3400' WHERE code = 'system/login-log/destroy'").Error
 }
 
 // ensureRoleDeptTable 创建角色-部门关联表（自定义数据权限用），幂等。

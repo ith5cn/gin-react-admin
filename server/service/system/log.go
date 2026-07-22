@@ -1,11 +1,13 @@
 package system
 
 import (
+	"net"
+	"strings"
+	"time"
+
 	commonResponse "server/model/common/response"
 	systemModel "server/model/system"
 	loggerInit "server/setup/logger"
-	"strings"
-	"time"
 
 	"go.uber.org/zap"
 )
@@ -13,7 +15,18 @@ import (
 // LoginLogList 分页查询登录日志，按 id 倒序（最新的在前）。
 func LoginLogList(query map[string]string) (*commonResponse.PageResult, error) {
 	var data []systemModel.AISystemLoginLog
-	return pageList(query, &systemModel.AISystemLoginLog{}, &data, map[string]string{"username": "username"}, map[string]string{"status": "status", "ip": "ip"}, "id DESC")
+	filters := []QueryFilter{
+		{Param: "username", Column: "username", Op: "like"},
+		{Param: "status", Column: "status", Op: "eq"},
+		{Param: "ip", Column: "ip", Op: "like"},
+		{Param: "loginTime", Column: "login_time", Op: "between"},
+	}
+	return PageListFiltered(query, &systemModel.AISystemLoginLog{}, &data, filters, nil, "id DESC", true)
+}
+
+// LoginLogDelete 删除指定登录日志。审计日志不提供新增和编辑入口。
+func LoginLogDelete(id string) error {
+	return deleteByID(&systemModel.AISystemLoginLog{}, id)
 }
 
 // OperLogList 分页查询操作日志，按 id 倒序。
@@ -38,14 +51,16 @@ func RecordLoginLog(username, ip, userAgent string, success bool, message string
 	}
 	now := time.Now()
 	osName, browser := parseUserAgent(userAgent)
+	location := loginIPLocation(ip)
 	entry := systemModel.AISystemLoginLog{
-		Username:  ptrString(username),
-		IP:        ptrString(ip),
-		OS:        ptrString(osName),
-		Browser:   ptrString(browser),
-		Status:    status,
-		Message:   ptrString(message),
-		LoginTime: &now,
+		Username:   ptrString(username),
+		IP:         ptrString(ip),
+		IPLocation: ptrString(location),
+		OS:         ptrString(osName),
+		Browser:    ptrString(browser),
+		Status:     status,
+		Message:    ptrString(message),
+		LoginTime:  &now,
 	}
 	if err := db.Create(&entry).Error; err != nil {
 		loggerInit.Logger.Get().Error("record login log failed", zap.Error(err))
@@ -61,6 +76,7 @@ func RecordOperLog(username, method, router, serviceName, ip, requestData string
 		return
 	}
 
+	location := loginIPLocation(ip)
 	entry := systemModel.AISystemOperLog{
 		App:         ptrString("backend"),
 		Method:      ptrString(method),
@@ -68,11 +84,27 @@ func RecordOperLog(username, method, router, serviceName, ip, requestData string
 		ServiceName: ptrString(serviceName),
 		Username:    ptrString(username),
 		IP:          ptrString(ip),
+		IPLocation:  ptrString(location),
 		RequestData: ptrString(requestData),
 	}
 	if err := db.Create(&entry).Error; err != nil {
 		loggerInit.Logger.Get().Error("record oper log failed", zap.Error(err))
 	}
+}
+
+// loginIPLocation 对本机和内网地址做离线标注；公网地址不调用外部服务。
+func loginIPLocation(value string) string {
+	ip := net.ParseIP(value)
+	if ip == nil {
+		return ""
+	}
+	if ip.IsLoopback() {
+		return "本机"
+	}
+	if ip.IsPrivate() {
+		return "内网"
+	}
+	return ""
 }
 
 // parseUserAgent 从 User-Agent 里粗略识别操作系统和浏览器。
@@ -83,12 +115,12 @@ func parseUserAgent(userAgent string) (osName string, browser string) {
 	switch {
 	case strings.Contains(ua, "windows"):
 		osName = "Windows"
-	case strings.Contains(ua, "mac os") || strings.Contains(ua, "macintosh"):
-		osName = "macOS"
 	case strings.Contains(ua, "android"):
 		osName = "Android"
 	case strings.Contains(ua, "iphone"), strings.Contains(ua, "ipad"):
 		osName = "iOS"
+	case strings.Contains(ua, "mac os") || strings.Contains(ua, "macintosh"):
+		osName = "macOS"
 	case strings.Contains(ua, "linux"):
 		osName = "Linux"
 	default:
